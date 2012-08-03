@@ -303,7 +303,8 @@ Optional argument FINISH non-nil means to not replace characters with _."
   (case choice
     (:source
      (replace-regexp-in-string " " "_"
-                               (assoc-default 'source hm-current-word-alist)))
+                               (downcase
+                                (assoc-default 'source hm-current-word-alist))))
     (:target (assoc-default 'target hm-current-word-alist))
     (t hm-current-word-alist)))
 
