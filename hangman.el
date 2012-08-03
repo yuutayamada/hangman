@@ -249,8 +249,11 @@ Optional argument DOSTATS will update the statistics if set."
     (end-of-line)
     (insert (format "
  ============= H i n t ================
- == %s ==
- ============= H i n t ================\n" (hm-extract :target)))))
+ == meaning %s ==
+ == string number %s ==
+ ============= H i n t ================"
+                    (hm-extract :target)
+                    (- (length hm-current-word) (hm-count-under-score))))))
 
 ;;; Text Properties
 ;;
