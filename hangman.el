@@ -164,31 +164,32 @@ Turn read only back on when done."
 (defun hm-self-guess-char ()
   "Guess the character that was pressed."
   (interactive)
-  (if (hm-win)
-      nil
-    (let ((c last-input-event)
-          (i (+ 0 (hm-count-under-score)))
-          (found 0)
-          (case-fold-search nil))
-      (hm-already-guessed c)
-      (while (< i (length hm-current-word))
-        (if (char-equal (aref hm-current-word i) c)
-            (progn
-              (setq found (1+ found))
-              (aset hm-current-guess-string (* i 2) (upcase c))
-              (hm-fontify-char hm-current-guess-string (* 2 i)
-                               (if (facep 'font-lock-function-name-face)
-                                   'font-lock-function-name-face
-                                 'bold))))
-        (setq i (1+ i)))
-      (if (/= found 0)
-          (message "Found %d occurances of %c" found c)
-        (message "No uccurances of %c" c)
-        (setq hm-num-failed-guesses (1+ hm-num-failed-guesses)
-              hm-wrong-guess-string (concat hm-wrong-guess-string " "
-                                            (char-to-string (upcase c))))))
-    (hm-refresh)
-    (hm-win t)))
+  (let* ((c last-input-event)
+         (i 0)
+         (found 0)
+         (case-fold-search nil))
+    (hm-already-guessed c)
+    (while (< i (length hm-current-word))
+      (if (char-equal (aref hm-current-word i) c)
+          (progn
+            (setq found (1+ found))
+            (aset hm-current-guess-string (* i 2) (upcase c))
+            (hm-fontify-char hm-current-guess-string (* 2 i)
+                             (if (facep 'font-lock-function-name-face)
+                                 'font-lock-function-name-face
+                               'bold))))
+      (setq i (1+ i)))
+    (if (/= found 0)
+        (message "Found %d occurances of %c" found c)
+      (message "No uccurances of %c" c)
+      (setq hm-num-failed-guesses (1+ hm-num-failed-guesses)
+            hm-wrong-guess-string (concat hm-wrong-guess-string " "
+                                          (char-to-string (upcase c))))))
+  (hm-refresh)
+  (hm-win t)
+  (when (hm-win-p)
+    (if (y-or-n-p "You won!  Play again?")
+        (hm-initialize))))
 
 (defun hm-already-guessed (c)
   "Signal an error if character C has already been played."
@@ -216,9 +217,11 @@ Optional argument DOSTATS will update the statistics if set."
       (if dostats
           (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0))))
       (hm-refresh)
-      (if (y-or-n-p "You won!  Play again?")
-          (hm-initialize))
       t)))
+
+(defun hm-win-p ()
+  (equal (- (length hm-current-guess-string) (hm-count-under-score))
+         (length (replace-regexp-in-string "_" "" hm-current-guess-string))))
 
 ;;; Rendering
 ;;
