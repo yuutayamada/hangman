@@ -67,7 +67,7 @@
 (defvar hm-map
   (let* ((map (make-sparse-keymap))
          (i ?a))
-    (while (not (char-equal ?Z i))
+    (while (not (char-equal ?z i))
       (define-key map (char-to-string i) 'hm-self-guess-char)
       (setq i (1+ i)))
     map)
