@@ -36,6 +36,13 @@
 ;; Allows user to play hangman iff /usr/dict/words or compatible file
 ;; is installed.
 
+;;; Usage
+;; (add-to-list 'load-path "path/to/hangman")
+;; (require 'hangman)
+;; specify path for dictionary-file, by default "/usr/dict/words"
+;; for example..
+;; (setq hm-dictionary-file "~/.logaling/glossary/my-dictionary.en.ja.yml")
+
 ;;; History:
 ;;; 0.1  Initial revision
 
