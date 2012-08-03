@@ -229,7 +229,17 @@ Optional argument DOSTATS will update the statistics if set."
     (forward-line 2)
     (end-of-line)
     (insert (format "         Games won: %d    Games Lost: %d"
-                    (aref hm-win-statistics 0) (aref hm-win-statistics 1)))))
+                    (aref hm-win-statistics 0) (aref hm-win-statistics 1)))
+    (hm-insert-target-word-for-logaling)))
+
+(defun hm-insert-target-word-for-logaling ()
+  (when (string-match "\.yml$" hm-dictionary-file)
+    (forward-line 2)
+    (end-of-line)
+    (insert (format "
+ ============= H i n t ================
+ == %s ==
+ ============= H i n t ================\n" (hm-extract :target)))))
 
 ;;; Text Properties
 ;;
