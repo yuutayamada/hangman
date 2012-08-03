@@ -139,7 +139,7 @@ Turn read only back on when done."
   (interactive)
   (if (hm-win)
       nil
-    (let ((c last-input-char) (i 0) (found 0)
+    (let ((c last-input-event) (i 0) (found 0)
           (case-fold-search nil))
       (hm-already-guessed c)
       (while (< i (length hm-current-word))
