@@ -117,8 +117,8 @@ Turn read only back on when done."
   (list 'let '((hm-with-writable-buff (current-buffer)))
         '(setq buffer-read-only nil)
         (cons 'progn forms)
-        '(save-excursion (set-buffer hm-with-writable-buff)
-                         (setq buffer-read-only t))))
+        '(with-current-buffer hm-with-writable-buff
+           (setq buffer-read-only t))))
 
 (put 'hm-with-writable 'lisp-indent-function 0)
 
@@ -251,8 +251,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
 
 (defun hm-fetch-one-random-word ()
   "Return a word from the system dictionary."
-  (save-excursion
-    (set-buffer (find-file-noselect hm-dictionary-file))
+  (with-current-buffer (find-file-noselect hm-dictionary-file)
     (goto-char (random (point-max)))
     (beginning-of-line)
     (prog1
