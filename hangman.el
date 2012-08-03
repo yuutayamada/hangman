@@ -201,14 +201,13 @@ Turn read only back on when done."
 Optional argument DOSTATS will update the statistics if set."
   (let ((case-fold-search nil))
     (if (string-match "[a-z_] " hm-current-guess-string)
-        (if (= hm-num-failed-guesses (1- (length hm-vector)))
-            (progn
-              (if dostats
-                  (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1))))
-              (setq hm-current-guess-string
-                    (hm-make-guess-string hm-current-word
-                                          hm-current-guess-string))
-              (hm-refresh)
+        (when (= hm-num-failed-guesses (1- (length hm-vector)))
+          (if dostats
+              (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1))))
+          (setq hm-current-guess-string
+                (hm-make-guess-string hm-current-word
+                                      hm-current-guess-string))
+          (hm-refresh)
           (hm-query-playng-again 'lost))
       (hm-refresh)
       t)))
