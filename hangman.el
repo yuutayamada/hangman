@@ -75,8 +75,7 @@
         mode-name "HangMan")
   (use-local-map hm-map)
   (hm-initialize)
-  (run-hooks 'hm-hooks)
-  )
+  (run-hooks 'hm-hooks))
 
 ;;; Game playing functions and variables
 ;;
