@@ -186,6 +186,7 @@ Turn read only back on when done."
   (hm-refresh)
   (hm-win t)
   (when (hm-win-p)
+    (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0)))
     (if (y-or-n-p "You won!  Play again?")
         (hm-initialize))))
 
@@ -212,8 +213,6 @@ Optional argument DOSTATS will update the statistics if set."
               (if (y-or-n-p "You lost! Play again?")
                   (hm-initialize)
                 t)))
-      (if dostats
-          (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0))))
       (hm-refresh)
       t)))
 
