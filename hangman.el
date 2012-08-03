@@ -53,16 +53,14 @@
 (defvar hm-hooks nil
   "Hooks run when entering hangman mode.")
 
-(defvar hm-map nil
-  "Keymap used in hangman mode.")
-
-(if hm-map
-    nil
-  (setq hm-map (make-keymap "Hangman"))
-  (let ((i ?a))
+(defvar hm-map
+  (let* ((map (make-sparse-keymap))
+         (i ?a))
     (while (not (char-equal ?Z i))
-      (define-key hm-map (char-to-string i) 'hm-self-guess-char)
-      (setq i (1+ i)))))
+      (define-key map (char-to-string i) 'hm-self-guess-char)
+      (setq i (1+ i)))
+    map)
+  "Keymap used in hangman mode.")
 
 ;;; Game Mode
 ;;
