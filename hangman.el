@@ -150,8 +150,7 @@ Turn read only back on when done."
               (hm-fontify-char hm-current-guess-string (* 2 i)
                                (if (facep 'font-lock-function-name-face)
                                    'font-lock-function-name-face
-                                 'bold))
-              ))
+                                 'bold))))
         (setq i (1+ i)))
       (if (/= found 0)
           (message "Found %d occurances of %c" found c)
