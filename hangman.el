@@ -45,6 +45,7 @@
 
 ;;; History:
 ;;; 0.1  Initial revision
+;;; 2012/8~ Improve (Yuta Yamada)
 
 ;;; Code:
 
