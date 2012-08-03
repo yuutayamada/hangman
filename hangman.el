@@ -116,10 +116,10 @@
   "Allow the buffer to be writable and evaluate FORMS.
 Turn read only back on when done."
   (list 'let '((hm-with-writable-buff (current-buffer)))
-        '(toggle-read-only -1)
+        '(setq buffer-read-only nil)
         (cons 'progn forms)
         '(save-excursion (set-buffer hm-with-writable-buff)
-                         (toggle-read-only 1))))
+                         (setq buffer-read-only t))))
 
 (put 'hm-with-writable 'lisp-indent-function 0)
 
@@ -131,7 +131,7 @@ Turn read only back on when done."
        (hm-make-guess-string hm-current-word))
   (set (make-local-variable 'hm-num-failed-guesses) 0)
   (set (make-local-variable 'hm-wrong-guess-string) "")
-  (toggle-read-only 1)
+  (setq buffer-read-only t)
   (hm-refresh)
   t)
 
