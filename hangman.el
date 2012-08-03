@@ -264,7 +264,7 @@ Optional argument DOSTATS will update the statistics if set."
 (defun hm-make-guess-string (string &optional finish)
   "Return a string representing a new guess string based on STRING.
 Optional argument FINISH non-nil means to not replace characters with _."
-  (let ((ns "") (i 0))
+  (let* ((ns "") (i 0))
     (while (< i (length string))
       (cond ((and (>= (aref string i) ?A) (<= (aref string i) ?z))
              (if finish
