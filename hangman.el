@@ -187,8 +187,7 @@ Turn read only back on when done."
   (hm-win t)
   (when (hm-win-p)
     (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0)))
-    (if (y-or-n-p "You won!  Play again?")
-        (hm-initialize))))
+    (hm-query-playng-again 'win)))
 
 (defun hm-already-guessed (c)
   "Signal an error if character C has already been played."
@@ -210,15 +209,17 @@ Optional argument DOSTATS will update the statistics if set."
                     (hm-make-guess-string hm-current-word
                                           hm-current-guess-string))
               (hm-refresh)
-              (if (y-or-n-p "You lost! Play again?")
-                  (hm-initialize)
-                t)))
+          (hm-query-playng-again 'lost))
       (hm-refresh)
       t)))
 
 (defun hm-win-p ()
   (equal (- (length hm-current-guess-string) (hm-count-under-score))
          (length (replace-regexp-in-string "_" "" hm-current-guess-string))))
+
+(defun hm-query-playng-again (win-or-lost)
+  (if (y-or-n-p (concat "You " (symbol-name win-or-lost) "! Play again?"))
+      (hm-initialize)))
 
 ;;; Rendering
 ;;
