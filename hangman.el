@@ -65,11 +65,9 @@
   "Hooks run when entering hangman mode.")
 
 (defvar hm-map
-  (let* ((map (make-sparse-keymap))
-         (i ?a))
-    (while (not (char-equal ?z i))
-      (define-key map (char-to-string i) 'hm-self-guess-char)
-      (setq i (1+ i)))
+  (let* ((map (make-sparse-keymap)))
+    (loop for i from ?a to ?z do
+          (define-key map (char-to-string i) 'hm-self-guess-char))
     map)
   "Keymap used in hangman mode.")
 
