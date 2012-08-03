@@ -41,6 +41,9 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl))
+
 (defvar hm-user-proper-nouns-flag t
   "*Non-nil means to allow proper nouns as potential words.")
 
@@ -61,6 +64,8 @@
       (setq i (1+ i)))
     map)
   "Keymap used in hangman mode.")
+
+(defvar hm-current-word-alist nil)
 
 ;;; Game Mode
 ;;
@@ -125,7 +130,9 @@ Turn read only back on when done."
 (defun hm-initialize ()
   "Initialize this buffer w/ a new word."
   (interactive)
-  (set (make-local-variable 'hm-current-word) (hm-fetch-random-word))
+  (if (string-match "\.yml$" hm-dictionary-file)
+      (hm-initialize-for-logaling)
+    (set (make-local-variable 'hm-current-word) (hm-fetch-random-word)))
   (set (make-local-variable 'hm-current-guess-string)
        (hm-make-guess-string hm-current-word))
   (set (make-local-variable 'hm-num-failed-guesses) 0)
@@ -134,12 +141,26 @@ Turn read only back on when done."
   (hm-refresh)
   t)
 
+(defun hm-initialize-for-logaling ()
+  (hm-setup-random-word-for-logaling)
+  (set (make-local-variable 'hm-current-word) (hm-extract :source)))
+
+(defun hm-count-under-score ()
+  (loop with tokens = (string-to-list (split-string (hm-extract :source) ""))
+        for token in tokens
+        for count = 0 then count
+        if (string-match "_" token)
+        do (setq count (+ count 1))
+        finally return count))
+
 (defun hm-self-guess-char ()
   "Guess the character that was pressed."
   (interactive)
   (if (hm-win)
       nil
-    (let ((c last-input-event) (i 0) (found 0)
+    (let ((c last-input-event)
+          (i (+ 0 (hm-count-under-score)))
+          (found 0)
           (case-fold-search nil))
       (hm-already-guessed c)
       (while (< i (length hm-current-word))
@@ -256,6 +277,28 @@ Optional argument FINISH non-nil means to not replace characters with _."
     (prog1
         (buffer-substring-no-properties (point) (progn (end-of-line) (point)))
       (goto-char (point-min)))))
+
+(defun hm-extract (&optional choice)
+  (case choice
+    (:source
+     (replace-regexp-in-string " " "_"
+                               (assoc-default 'source hm-current-word-alist)))
+    (:target (assoc-default 'target hm-current-word-alist))
+    (t hm-current-word-alist)))
+
+(defun hm-setup-random-word-for-logaling ()
+  (let* ((source-regexp "- source_term: \\([a-zA-Z ]+\\)?\n")
+         (target-regexp "  target_term: \\(\\w+\\)?\n")
+         (make-alist (lambda ()
+                       (setq hm-current-word-alist
+                             (list (cons 'source (match-string 1))
+                                   (cons 'target (match-string 2)))))))
+    (with-current-buffer (find-file-noselect hm-dictionary-file)
+      (goto-char (random (point-max)))
+      (if (re-search-forward (concat source-regexp target-regexp) nil t)
+          (funcall make-alist)
+        (re-search-backward (concat source-regexp target-regexp) nil t)
+        (funcall make-alist)))))
 
 (provide 'hangman)
 ;;; hangman.el ends here
