@@ -162,32 +162,38 @@ Turn read only back on when done."
 (defun hm-self-guess-char ()
   "Guess the character that was pressed."
   (interactive)
-  (let* ((c last-input-event)
-         (i 0)
-         (found 0)
-         (case-fold-search nil))
-    (hm-already-guessed c)
-    (while (< i (length hm-current-word))
-      (if (char-equal (aref hm-current-word i) c)
-          (progn
-            (setq found (1+ found))
-            (aset hm-current-guess-string (* i 2) c)
-            (hm-fontify-char hm-current-guess-string (* 2 i)
-                             (if (facep 'font-lock-function-name-face)
-                                 'font-lock-function-name-face
-                               'bold))))
-      (setq i (1+ i)))
-    (if (/= found 0)
-        (message "Found %d occurances of %c" found c)
-      (message "No uccurances of %c" c)
-      (setq hm-num-failed-guesses (1+ hm-num-failed-guesses)
-            hm-wrong-guess-string (concat hm-wrong-guess-string " "
-                                          (char-to-string (upcase c))))))
+  (hm-check-each-character last-input-event)
   (hm-refresh)
   (hm-win t)
   (when (hm-win-p)
     (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0)))
     (hm-query-playng-again 'win)))
+
+(defun hm-check-each-character (input)
+  (hm-already-guessed input)
+  (loop with case-fold-search = nil
+        for i from 0 upto (1- (length hm-current-word))
+        for character = input
+        for found = 0 then found
+        if (char-equal (aref hm-current-word i) character) do
+        (setq found (1+ found))
+        (hm-found-guess-string i character)
+        finally (hm-response found character)))
+
+(defun hm-response (found c)
+  (if (/= found 0)
+      (message "Found %d occurances of %c" found c)
+    (message "No uccurances of %c" c)
+    (setq hm-num-failed-guesses (1+ hm-num-failed-guesses)
+          hm-wrong-guess-string (concat hm-wrong-guess-string " "
+                                        (char-to-string (upcase c))))))
+
+(defun hm-found-guess-string (i character)
+  (aset hm-current-guess-string (* i 2) character) ;upcase
+  (hm-fontify-char hm-current-guess-string (* 2 i)
+                   (if (facep 'font-lock-function-name-face)
+                       'font-lock-function-name-face
+                     'bold)))
 
 (defun hm-already-guessed (c)
   "Signal an error if character C has already been played."
