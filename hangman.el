@@ -171,7 +171,7 @@ Turn read only back on when done."
       (if (char-equal (aref hm-current-word i) c)
           (progn
             (setq found (1+ found))
-            (aset hm-current-guess-string (* i 2) (upcase c))
+            (aset hm-current-guess-string (* i 2) c)
             (hm-fontify-char hm-current-guess-string (* 2 i)
                              (if (facep 'font-lock-function-name-face)
                                  'font-lock-function-name-face
