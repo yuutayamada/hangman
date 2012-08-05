@@ -189,9 +189,7 @@ Turn read only back on when done."
 (defun hm-found-guess-string (i character)
   (aset hm-current-guess-string (* i 2) character) ;upcase
   (hm-fontify-char hm-current-guess-string (* 2 i)
-                   (if (facep 'font-lock-function-name-face)
-                       'font-lock-function-name-face
-                     'bold)))
+                   'font-lock-function-name-face))
 
 (defun hm-already-guessed (c)
   "Signal an error if character C has already been played."
@@ -257,7 +255,14 @@ Optional argument DOSTATS will update the statistics if set."
 (defun hm-fontify-char (string idx face)
   "Fontify one character in STRING at position IDX with FACE."
   (if (fboundp 'put-text-property)
-      (put-text-property  idx (1+ idx) 'face face string)))
+      (put-text-property  idx (1+ idx) 'face (hm-justify-face face) string)))
+
+(defun hm-justify-face (face)
+  (if (facep face)
+      face
+    (case face
+      ('font-lock-comment-face 'underline)
+      ('font-lock-function-name-face 'bold))))
 
 ;;; Word Retrieval
 (defun hm-make-guess-string (string &optional finish)
@@ -269,10 +274,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
              (if finish
                  (when (char-equal (aref finish (* 2 i)) ?_)
                    (aset finish (* 2 i) (aref string i))
-                   (hm-fontify-char finish (* 2 i)
-                                    (if (facep 'font-lock-comment-face)
-                                        'font-lock-comment-face
-                                      'underline)))
+                   (hm-fontify-char finish (* 2 i) 'font-lock-comment-face))
                (setq ns (concat ns "_ "))))
             (t
              (setq ns (concat ns (aref string i) " "))))
