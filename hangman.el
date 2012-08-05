@@ -273,13 +273,12 @@ Optional argument FINISH non-nil means to not replace characters with _."
     (while (< i (length string))
       (cond ((and (>= (aref string i) ?A) (<= (aref string i) ?z))
              (if finish
-                 (if (char-equal (aref finish (* 2 i)) ?_)
-                     (progn
-                       (aset finish (* 2 i) (aref string i))
-                       (hm-fontify-char finish (* 2 i)
-                                        (if (facep 'font-lock-comment-face)
-                                            'font-lock-comment-face
-                                          'underline))))
+                 (when (char-equal (aref finish (* 2 i)) ?_)
+                   (aset finish (* 2 i) (aref string i))
+                   (hm-fontify-char finish (* 2 i)
+                                    (if (facep 'font-lock-comment-face)
+                                        'font-lock-comment-face
+                                      'underline)))
                (setq ns (concat ns "_ "))))
             (t
              (setq ns (concat ns (aref string i) " "))))
