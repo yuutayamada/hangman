@@ -223,7 +223,6 @@ Optional argument DOSTATS will update the statistics if set."
       (hm-initialize)))
 
 ;;; Rendering
-;;
 (defun hm-refresh ()
   "Refresh the hangman buffer w/ new images."
   (hm-with-writable
