@@ -120,6 +120,8 @@
 |         |\n|        / \\\n|       /   \\\n|"]
   "Vector of hangman states.")
 
+(defvar hm-use-other-format nil)
+
 (defmacro hm-with-writable (&rest forms)
   "Allow the buffer to be writable and evaluate FORMS.
 Turn read only back on when done."
@@ -242,7 +244,22 @@ Optional argument DOSTATS will update the statistics if set."
 (defun hm-insert-currnet-guess-string ()
   (forward-line 20)
   (end-of-line)
-  (insert "\n   " hm-current-guess-string))
+  (insert "\n              " (hm-convert hm-current-guess-string) "\n"))
+
+(defun hm-convert (guess-string)
+  (if hm-use-other-format
+      (loop with source-tokens = (string-to-list (hm-extract :source))
+            with result = '()
+            for num from 0 upto (1- (length (hm-extract :source)))
+            for current-character = (char-to-string (nth num source-tokens))
+            for guess = (char-to-string
+                         (nth num (string-to-list
+                           (replace-regexp-in-string " " "" guess-string))))
+            if (string= "_" current-character)
+            collect " " into result
+            else collect guess into result
+            finally return (mapconcat 'identity result ""))
+    guess-string))
 
 (defun hm-insert-target-word-for-logaling ()
   (when (string-match "\.yml$" hm-dictionary-file)
