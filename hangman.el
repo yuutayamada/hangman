@@ -170,7 +170,7 @@ Turn read only back on when done."
     (hm-query-playng-again 'win)))
 
 (defun hm-check-each-character (input)
-  (hm-already-guessed input)
+  (hm-already-guessed (char-to-string input))
   (loop with case-fold-search = nil
         for i from 0 upto (1- (length hm-current-word))
         for character = input
@@ -195,10 +195,10 @@ Turn read only back on when done."
 
 (defun hm-already-guessed (c)
   "Signal an error if character C has already been played."
-  (let ((case-fold-search t) (re (char-to-string c)))
+  (let ((case-fold-search t) (re c))
     (if (or (string-match re hm-wrong-guess-string)
             (string-match re hm-current-guess-string))
-        (error "You have already guessed %c" c))))
+        (error "You have already guessed %s" c))))
 
 (defun hm-win (&optional dostats)
   "Do the right thing if the game has been won.
