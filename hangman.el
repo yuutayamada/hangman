@@ -74,7 +74,6 @@
 (defvar hm-current-word-alist nil)
 
 ;;; Game Mode
-;;
 (defalias 'hangman 'hm-mode)
 
 (defun hm-mode ()
@@ -89,7 +88,6 @@
   (run-hooks 'hm-hooks))
 
 ;;; Game playing functions and variables
-;;
 (defvar hm-current-word nil
   "This is not the word the user must guess represented as a vector.")
 
@@ -262,14 +260,12 @@ Optional argument DOSTATS will update the statistics if set."
                     (- (length hm-current-word) (hm-count-under-score))))))
 
 ;;; Text Properties
-;;
 (defun hm-fontify-char (string idx face)
   "Fontify one character in STRING at position IDX with FACE."
   (if (fboundp 'put-text-property)
       (put-text-property  idx (1+ idx) 'face face string)))
 
 ;;; Word Retrieval
-;;
 (defun hm-make-guess-string (string &optional finish)
   "Return a string representing a new guess string based on STRING.
 Optional argument FINISH non-nil means to not replace characters with _."
