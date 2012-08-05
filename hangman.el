@@ -239,8 +239,8 @@ Optional argument DOSTATS will update the statistics if set."
     (end-of-line)
     (insert (format "         Games won: %d    Games Lost: %d"
                     (aref hm-win-statistics 0) (aref hm-win-statistics 1)))
-    (hm-insert-currnet-guess-string)
-    (hm-insert-target-word-for-logaling)))
+    (hm-insert-target-word-for-logaling)
+    (hm-insert-currnet-guess-string)))
 
 (defun hm-insert-currnet-guess-string ()
   (forward-line 20)
@@ -251,13 +251,7 @@ Optional argument DOSTATS will update the statistics if set."
   (when (string-match "\.yml$" hm-dictionary-file)
     (forward-line 2)
     (end-of-line)
-    (insert (format "
- ============= H i n t ================
- == meaning %s ==
- == string number %s ==
- ============= H i n t ================"
-                    (hm-extract :target)
-                    (- (length hm-current-word) (hm-count-under-score))))))
+    (insert (format "         Meaning: %s" (hm-extract :target)))))
 
 ;;; Text Properties
 (defun hm-fontify-char (string idx face)
