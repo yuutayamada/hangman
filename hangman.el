@@ -239,12 +239,15 @@ Optional argument DOSTATS will update the statistics if set."
     (insert "         Failed Letters: " hm-wrong-guess-string)
     (forward-line 2)
     (end-of-line)
-    (insert "            " hm-current-guess-string)
-    (forward-line 2)
-    (end-of-line)
     (insert (format "         Games won: %d    Games Lost: %d"
                     (aref hm-win-statistics 0) (aref hm-win-statistics 1)))
+    (hm-insert-currnet-guess-string)
     (hm-insert-target-word-for-logaling)))
+
+(defun hm-insert-currnet-guess-string ()
+  (forward-line 20)
+  (end-of-line)
+  (insert "\n   " hm-current-guess-string))
 
 (defun hm-insert-target-word-for-logaling ()
   (when (string-match "\.yml$" hm-dictionary-file)
