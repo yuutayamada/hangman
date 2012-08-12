@@ -236,6 +236,7 @@ Turn read only back on when done."
       t)))
 
 (defun hm-lose ()
+  (interactive)
   (add-to-list 'hm-mistaken-words (hm-extract :source))
   ;; Lose count
   (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
