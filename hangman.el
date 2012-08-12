@@ -68,9 +68,7 @@
   (let* ((map (make-sparse-keymap)))
     (loop for i from ?a to ?z do
           (define-key map (char-to-string i) 'hm-self-guess-char))
-    (define-key map (kbd "C-j") (lambda ()
-                                  (interactive)
-                                  (hm-lose t)))
+    (define-key map (kbd "C-j") 'hm-lose)
     map)
   "Keymap used in hangman mode.")
 
@@ -235,15 +233,14 @@ Optional argument DOSTATS will update the statistics if set."
   (let ((case-fold-search nil))
     (if (string-match "[a-z_] " hm-current-guess-string)
         (when (= hm-num-failed-guesses (1- (length hm-vector)))
-          (hm-lose dostats))
+          (hm-lose))
       (hm-refresh)
       t)))
 
-(defun hm-lose (dostats)
-  (when dostats
-    (add-to-list 'hm-mistaken-words (hm-extract :source))
-    ;; Lose count
-    (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1))))
+(defun hm-lose ()
+  (add-to-list 'hm-mistaken-words (hm-extract :source))
+  ;; Lose count
+  (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
   (setq hm-current-guess-string
         (hm-make-guess-string hm-current-word
                               hm-current-guess-string))
