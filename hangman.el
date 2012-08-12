@@ -120,6 +120,8 @@
 |         |\n|        / \\\n|       /   \\\n|"]
   "Vector of hangman states.")
 
+(defvar hm-correct-answer-list '())
+
 (defvar hm-use-other-format nil)
 
 (defmacro hm-with-writable (&rest forms)
@@ -166,8 +168,16 @@ Turn read only back on when done."
   (hm-refresh)
   (hm-win t)
   (when (hm-win-p)
+    (add-to-list 'hm-correct-answer-list (hm-extract :source))
     (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0)))
     (hm-query-playng-again 'win)))
+
+(defun hm-corrected-answer-p ()
+  (loop with current-answer = (hm-extract :source)
+        for answer in hm-correct-answer-list
+        if (equal answer current-answer)
+        do (return t)
+        finally return nil))
 
 (defun hm-check-each-character (input)
   (hm-already-guessed (char-to-string input))
@@ -336,7 +346,10 @@ Optional argument FINISH non-nil means to not replace characters with _."
       (if (re-search-forward (concat source-regexp target-regexp) nil t)
           (funcall make-alist)
         (re-search-backward (concat source-regexp target-regexp) nil t)
-        (funcall make-alist)))))
+        (funcall make-alist)))
+    (if (and (not (null hm-correct-answer-list))
+             (hm-corrected-answer-p))
+        (hm-setup-random-word-for-logaling))))
 
 (provide 'hangman)
 ;;; hangman.el ends here
