@@ -142,9 +142,7 @@ Turn read only back on when done."
 (defun hm-initialize ()
   "Initialize this buffer w/ a new word."
   (interactive)
-  (if (string-match "\.yml$" hm-dictionary-file)
-      (hm-initialize-for-logaling)
-    (set (make-local-variable 'hm-current-word) (hm-fetch)))
+  (hm-fetch)
   (set (make-local-variable 'hm-current-guess-string)
        (hm-make-guess-string hm-current-word))
   (set (make-local-variable 'hm-num-failed-guesses) 0)
@@ -154,14 +152,20 @@ Turn read only back on when done."
   t)
 
 (defun hm-fetch ()
-  (let* ((mistaken-length (length hm-mistaken-words)))
-    (if (< 10 mistaken-length)
-      (nth (random mistaken-length) hm-mistaken-words)
+  (let* ((mistaken-length (length hm-mistaken-words))
+         (mistaken-word
+          (if (< 10 mistaken-length)
+              (nth (random mistaken-length) hm-mistaken-words)
+            nil)))
     (case hm-current-fetch-process
-      (:random (hm-fetch-random-word))))))
+      (:random
+       (if (string-match "\.yml$" hm-dictionary-file)
+           (hm-initialize-for-logaling mistaken-word)
+         (set (make-local-variable 'hm-current-word)
+              (or mistaken-word (hm-fetch-random-word))))))))
 
-(defun hm-initialize-for-logaling ()
-  (hm-setup-random-word-for-logaling)
+(defun hm-initialize-for-logaling (&optional mistaken-word)
+  (hm-setup-word-for-logaling mistaken-word)
   (set (make-local-variable 'hm-current-word) (hm-extract :source)))
 
 (defun hm-count-under-score ()
@@ -358,7 +362,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
     (:target (assoc-default 'target hm-current-word-alist))
     (t hm-current-word-alist)))
 
-(defun hm-setup-random-word-for-logaling ()
+(defun hm-setup-word-for-logaling (&optional mistaken-word)
   (let* ((source-regexp "- source_term: \\([a-zA-Z ]+\\)?\n")
          (target-regexp "  target_term: \\(\\w+\\)?\n")
          (make-alist (lambda ()
@@ -366,14 +370,19 @@ Optional argument FINISH non-nil means to not replace characters with _."
                              (list (cons 'source (match-string 1))
                                    (cons 'target (match-string 2)))))))
     (with-current-buffer (find-file-noselect hm-dictionary-file)
-      (goto-char (random (point-max)))
+      (if (not mistaken-word)
+          (goto-char (random (point-max)))
+        (goto-char (point-min))
+        (re-search-forward (replace-regexp-in-string "_" " " mistaken-word))
+        (goto-char (point-at-bol))
+        (goto-char (1- (point))))
       (if (re-search-forward (concat source-regexp target-regexp) nil t)
           (funcall make-alist)
         (re-search-backward (concat source-regexp target-regexp) nil t)
         (funcall make-alist)))
     (if (and (not (null hm-correct-answer-list))
              (hm-corrected-answer-p))
-        (hm-setup-random-word-for-logaling))))
+        (hm-setup-word-for-logaling))))
 
 (provide 'hangman)
 ;;; hangman.el ends here
