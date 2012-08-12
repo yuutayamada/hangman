@@ -73,6 +73,10 @@
 
 (defvar hm-current-word-alist nil)
 
+(defvar hm-mistaken-words '())
+
+(defvar hm-current-fetch-process :random)
+
 ;;; Game Mode
 (defalias 'hangman 'hm-mode)
 
@@ -140,7 +144,7 @@ Turn read only back on when done."
   (interactive)
   (if (string-match "\.yml$" hm-dictionary-file)
       (hm-initialize-for-logaling)
-    (set (make-local-variable 'hm-current-word) (hm-fetch-random-word)))
+    (set (make-local-variable 'hm-current-word) (hm-fetch)))
   (set (make-local-variable 'hm-current-guess-string)
        (hm-make-guess-string hm-current-word))
   (set (make-local-variable 'hm-num-failed-guesses) 0)
@@ -148,6 +152,13 @@ Turn read only back on when done."
   (setq buffer-read-only t)
   (hm-refresh)
   t)
+
+(defun hm-fetch ()
+  (let* ((mistaken-length (length hm-mistaken-words)))
+    (if (< 10 mistaken-length)
+      (nth (random mistaken-length) hm-mistaken-words)
+    (case hm-current-fetch-process
+      (:random (hm-fetch-random-word))))))
 
 (defun hm-initialize-for-logaling ()
   (hm-setup-random-word-for-logaling)
@@ -169,6 +180,7 @@ Turn read only back on when done."
   (hm-win t)
   (when (hm-win-p)
     (add-to-list 'hm-correct-answer-list (hm-extract :source))
+    (hm-delete-mistaken-word (hm-extract :source))
     (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0)))
     (hm-query-playng-again 'win)))
 
@@ -216,8 +228,10 @@ Optional argument DOSTATS will update the statistics if set."
   (let ((case-fold-search nil))
     (if (string-match "[a-z_] " hm-current-guess-string)
         (when (= hm-num-failed-guesses (1- (length hm-vector)))
-          (if dostats
-              (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1))))
+          (when dostats
+            ;; Lose count
+            (add-to-list 'hm-mistaken-words (hm-extract :source))
+            (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1))))
           (setq hm-current-guess-string
                 (hm-make-guess-string hm-current-word
                                       hm-current-guess-string))
@@ -225,6 +239,13 @@ Optional argument DOSTATS will update the statistics if set."
           (hm-query-playng-again 'lost))
       (hm-refresh)
       t)))
+
+(defun hm-delete-mistaken-word (corrected-word)
+  (loop with updated-mistaken-words = '()
+        for mistaken-word in hm-mistaken-words
+        unless (equal corrected-word mistaken-word)
+        collect mistaken-word into updated-mistaken-words
+        finally (setq hm-mistaken-words updated-mistaken-words)))
 
 (defun hm-win-p ()
   (equal (- (length hm-current-guess-string) (hm-count-under-score))
