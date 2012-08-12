@@ -182,7 +182,7 @@ Turn read only back on when done."
   (interactive)
   (hm-check-each-character last-input-event)
   (hm-refresh)
-  (hm-win t)
+  (hm-judgment)
   (when (hm-win-p)
     (add-to-list 'hm-correct-answer-list (hm-extract :source))
     (hm-delete-mistaken-word (hm-extract :source))
@@ -227,9 +227,7 @@ Turn read only back on when done."
             (string-match re hm-current-guess-string))
         (error "You have already guessed %s" c))))
 
-(defun hm-win (&optional dostats)
-  "Do the right thing if the game has been won.
-Optional argument DOSTATS will update the statistics if set."
+(defun hm-judgment ()
   (let ((case-fold-search nil))
     (if (string-match "[a-z_] " hm-current-guess-string)
         (when (= hm-num-failed-guesses (1- (length hm-vector)))
