@@ -68,6 +68,9 @@
   (let* ((map (make-sparse-keymap)))
     (loop for i from ?a to ?z do
           (define-key map (char-to-string i) 'hm-self-guess-char))
+    (define-key map (kbd "C-j") (lambda ()
+                                  (interactive)
+                                  (hm-lose t)))
     map)
   "Keymap used in hangman mode.")
 
