@@ -228,17 +228,20 @@ Optional argument DOSTATS will update the statistics if set."
   (let ((case-fold-search nil))
     (if (string-match "[a-z_] " hm-current-guess-string)
         (when (= hm-num-failed-guesses (1- (length hm-vector)))
-          (when dostats
-            ;; Lose count
-            (add-to-list 'hm-mistaken-words (hm-extract :source))
-            (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1))))
-          (setq hm-current-guess-string
-                (hm-make-guess-string hm-current-word
-                                      hm-current-guess-string))
-          (hm-refresh)
-          (hm-query-playng-again 'lost))
+          (hm-lose dostats))
       (hm-refresh)
       t)))
+
+(defun hm-lose (dostats)
+  (when dostats
+    (add-to-list 'hm-mistaken-words (hm-extract :source))
+    ;; Lose count
+    (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1))))
+  (setq hm-current-guess-string
+        (hm-make-guess-string hm-current-word
+                              hm-current-guess-string))
+  (hm-refresh)
+  (hm-query-playng-again 'lost))
 
 (defun hm-delete-mistaken-word (corrected-word)
   (loop with updated-mistaken-words = '()
