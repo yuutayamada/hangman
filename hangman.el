@@ -241,8 +241,7 @@ Turn read only back on when done."
   (add-to-list 'hm-mistaken-words (hm-extract :source))
   ;; Lose count
   (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
-  (setq hm-current-guess-string
-        (hm-make-guess-string hm-current-guess-string))
+  (setq hm-current-guess-string (hm-make-guess-string t))
   (hm-refresh)
   (hm-query-playng-again 'lost))
 
@@ -329,22 +328,24 @@ Turn read only back on when done."
       ('font-lock-function-name-face 'bold))))
 
 ;;; Word Retrieval
-(defun hm-make-guess-string (&optional finish)
+(defun hm-make-guess-string (&optional finish?)
   "Return a string representing a new guess string based on STRING.
 Optional argument FINISH non-nil means to not replace characters with _."
   (loop with new-string = ""
+        with finished-word   = hm-current-guess-string
         with unfinished-word = hm-current-word
         for i from 0 upto (1- (length unfinished-word)) do
         (cond ((and (>= (aref unfinished-word i) ?A)
                     (<= (aref unfinished-word i) ?z))
-               (if finish
-                   (when (char-equal (aref finish (* 2 i)) ?_)
-                     (aset finish (* 2 i) (aref unfinished-word i))
-                     (hm-fontify-char finish (* 2 i) 'font-lock-comment-face))
+               (if finish?
+                   (when (char-equal (aref finished-word (* 2 i)) ?_)
+                     (aset finished-word (* 2 i) (aref unfinished-word i))
+                     (hm-fontify-char finished-word
+                                      (* 2 i) 'font-lock-comment-face))
                  (setq new-string (concat new-string "_ "))))
               (t
                (setq new-string (concat new-string (aref unfinished-word i) " "))))
-        finally return (or finish new-string)))
+        finally return (if finish? finished-word new-string)))
 
 (defun hm-fetch-random-word ()
   "Return a random word that will match the options applied by the user."
