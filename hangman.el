@@ -197,15 +197,15 @@ Turn read only back on when done."
         finally return nil))
 
 (defun hm-check-each-character (input)
-  (hm-already-guessed (char-to-string input))
-  (loop with case-fold-search = nil
-        for i from 0 upto (1- (length hm-current-word))
-        for character = input
-        for found = 0 then found
-        if (char-equal (aref hm-current-word i) character) do
-        (setq found (1+ found))
-        (hm-found-guess-string i character)
-        finally (hm-response found character)))
+  (unless (hm-already-guessed (char-to-string input))
+    (loop with case-fold-search = nil
+          for i from 0 upto (1- (length hm-current-word))
+          for character = input
+          for found = 0 then found
+          if (char-equal (aref hm-current-word i) character) do
+          (setq found (1+ found))
+          (hm-found-guess-string i character)
+          finally (hm-response found character))))
 
 (defun hm-response (found c)
   (if (/= found 0)
@@ -223,9 +223,10 @@ Turn read only back on when done."
 (defun hm-already-guessed (c)
   "Signal an error if character C has already been played."
   (let ((case-fold-search t) (re c))
-    (if (or (string-match re hm-wrong-guess-string)
-            (string-match re hm-current-guess-string))
-        (error "You have already guessed %s" c))))
+    (when (or (string-match re hm-wrong-guess-string)
+              (string-match re hm-current-guess-string))
+      (minibuffer-message "You have already guessed %s" c)
+      t)))
 
 (defun hm-judgment ()
   (let ((case-fold-search nil))
