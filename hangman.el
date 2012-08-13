@@ -333,18 +333,17 @@ Turn read only back on when done."
 (defun hm-make-guess-string (string &optional finish)
   "Return a string representing a new guess string based on STRING.
 Optional argument FINISH non-nil means to not replace characters with _."
-  (let* ((ns "") (i 0))
-    (while (< i (length string))
-      (cond ((and (>= (aref string i) ?A) (<= (aref string i) ?z))
-             (if finish
-                 (when (char-equal (aref finish (* 2 i)) ?_)
-                   (aset finish (* 2 i) (aref string i))
-                   (hm-fontify-char finish (* 2 i) 'font-lock-comment-face))
-               (setq ns (concat ns "_ "))))
-            (t
-             (setq ns (concat ns (aref string i) " "))))
-      (setq i (1+ i)))
-    (or finish ns)))
+  (loop with new-string = ""
+        for i from 0 upto (1- (length string)) do
+        (cond ((and (>= (aref string i) ?A) (<= (aref string i) ?z))
+               (if finish
+                   (when (char-equal (aref finish (* 2 i)) ?_)
+                     (aset finish (* 2 i) (aref string i))
+                     (hm-fontify-char finish (* 2 i) 'font-lock-comment-face))
+                 (setq new-string (concat new-string "_ "))))
+              (t
+               (setq new-string (concat new-string (aref string i) " "))))
+        finally return (or finish new-string)))
 
 (defun hm-fetch-random-word ()
   "Return a random word that will match the options applied by the user."
