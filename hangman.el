@@ -145,7 +145,7 @@ Turn read only back on when done."
   (interactive)
   (hm-fetch)
   (set (make-local-variable 'hm-current-guess-string)
-       (hm-make-guess-string hm-current-word))
+       (hm-make-guess-string))
   (set (make-local-variable 'hm-num-failed-guesses) 0)
   (set (make-local-variable 'hm-wrong-guess-string) "")
   (setq buffer-read-only t)
@@ -242,8 +242,7 @@ Turn read only back on when done."
   ;; Lose count
   (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
   (setq hm-current-guess-string
-        (hm-make-guess-string hm-current-word
-                              hm-current-guess-string))
+        (hm-make-guess-string hm-current-guess-string))
   (hm-refresh)
   (hm-query-playng-again 'lost))
 
@@ -330,19 +329,21 @@ Turn read only back on when done."
       ('font-lock-function-name-face 'bold))))
 
 ;;; Word Retrieval
-(defun hm-make-guess-string (string &optional finish)
+(defun hm-make-guess-string (&optional finish)
   "Return a string representing a new guess string based on STRING.
 Optional argument FINISH non-nil means to not replace characters with _."
   (loop with new-string = ""
-        for i from 0 upto (1- (length string)) do
-        (cond ((and (>= (aref string i) ?A) (<= (aref string i) ?z))
+        with unfinished-word = hm-current-word
+        for i from 0 upto (1- (length unfinished-word)) do
+        (cond ((and (>= (aref unfinished-word i) ?A)
+                    (<= (aref unfinished-word i) ?z))
                (if finish
                    (when (char-equal (aref finish (* 2 i)) ?_)
-                     (aset finish (* 2 i) (aref string i))
+                     (aset finish (* 2 i) (aref unfinished-word i))
                      (hm-fontify-char finish (* 2 i) 'font-lock-comment-face))
                  (setq new-string (concat new-string "_ "))))
               (t
-               (setq new-string (concat new-string (aref string i) " "))))
+               (setq new-string (concat new-string (aref unfinished-word i) " "))))
         finally return (or finish new-string)))
 
 (defun hm-fetch-random-word ()
