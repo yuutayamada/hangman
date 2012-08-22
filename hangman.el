@@ -224,8 +224,8 @@ Turn read only back on when done."
                                         (upcase string)))))
 
 (defun hm-replace-guess-string (i character)
-  (aset hm-displaying-guess-string (* i 2) character) ;upcase
-  (hm-fontify-char hm-displaying-guess-string (* 2 i)
+  (aset hm-displaying-guess-string i character) ;upcase
+  (hm-fontify-char hm-displaying-guess-string i
                    'font-lock-function-name-face))
 
 (defun hm-already-guessed (c)
@@ -261,9 +261,7 @@ Turn read only back on when done."
         finally (setq hm-mistaken-words updated-mistaken-words)))
 
 (defun hm-win-p ()
-  (equal (- (length hm-displaying-guess-string)
-            (hm-count-ignoring-character))
-         (length (replace-regexp-in-string "_" "" hm-displaying-guess-string))))
+  (not (string-match "_" hm-displaying-guess-string)))
 
 (defun hm-query-playng-again (win-or-lost)
   (if (y-or-n-p (concat "You " (symbol-name win-or-lost) "! Play again?"))
@@ -289,23 +287,7 @@ Turn read only back on when done."
 (defun hm-insert-currnet-guess-string ()
   (forward-line 20)
   (end-of-line)
-  (insert "\n              " (hm-convert) "\n"))
-
-(defun hm-convert ()
-  (if hm-use-other-format
-      (loop with source-tokens = (hm-split-string (hm-extract :row_source))
-            with result = '()
-            for num from 0 upto (1- (length source-tokens))
-            for current-character = (nth num source-tokens)
-            for guess = (nth num
-                             (hm-split-string
-                              (replace-regexp-in-string " " ""
-                                         hm-displaying-guess-string)))
-            if (string= " " current-character)
-            collect " " into result
-            else collect guess into result
-            finally return (mapconcat 'identity result ""))
-    hm-displaying-guess-string))
+  (insert "\n              " hm-displaying-guess-string "\n"))
 
 (defun hm-nth-string (n string)
   (nth n (hm-split-string string)))
@@ -354,19 +336,23 @@ Optional argument FINISH non-nil means to not replace characters with _."
   (loop with new-string = ""
         with finished-word   = hm-displaying-guess-string
         with unfinished-word = hm-original-current-word
+        with allowing-regexp = "[a-zA-Z_]"
         for i from 0 upto (1- (length unfinished-word))
-        if (string-match "[a-zA-Z_]" (hm-nth-string i unfinished-word))
-        do (if finish?
-               (hm-coloring-to-unifinished-word i)
-             (setq new-string (concat new-string "_ ")))
+        if (and (string-match allowing-regexp (hm-nth-string i unfinished-word))
+                finish?)
+        do (hm-coloring-to-unifinished-word i)
+        else if (or (equal " " (hm-nth-string i unfinished-word))
+                    (equal "_" (hm-nth-string i unfinished-word)))
+        do      (setq new-string (concat new-string " ")) ;;
+        else do (setq new-string (concat new-string "_")) ;;
         finally return (if finish? finished-word new-string)))
 
 (defun hm-coloring-to-unifinished-word (i)
   (let* ((finished-word   hm-displaying-guess-string)
          (unfinished-word hm-original-current-word))
-    (when (char-equal (aref finished-word (* 2 i)) ?_)
-      (aset finished-word (* 2 i) (aref unfinished-word i))
-      (hm-fontify-char finished-word (* 2 i) 'font-lock-comment-face))))
+    (when (char-equal (aref finished-word i) ?_)
+      (aset finished-word i (aref unfinished-word i))
+      (hm-fontify-char finished-word i 'font-lock-comment-face))))
 
 (defun hm-fetch-random-word ()
   "Return a random word that will match the options applied by the user."
