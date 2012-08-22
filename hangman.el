@@ -70,6 +70,7 @@
           (define-key map (char-to-string i) 'hm-self-guess-char))
     (define-key map " " 'hm-lose)
     (define-key map "\C-j" 'hm-lose)
+    (define-key map "\C-q" 'hm-quit)
     map)
   "Keymap used in hangman mode.")
 
@@ -402,6 +403,10 @@ Optional argument FINISH non-nil means to not replace characters with _."
         (funcall make-alist)))
     (if (hm-corrected-answer-p)
         (hm-setup-word-for-logaling))))
+
+(defun hm-quit ()
+  (interactive)
+  (kill-buffer "*Hangman*"))
 
 (provide 'hangman)
 ;;; hangman.el ends here
