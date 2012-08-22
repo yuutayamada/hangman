@@ -161,7 +161,7 @@ Turn read only back on when done."
             nil)))
     (case hm-current-fetch-process
       (:random
-       (if (string-match "\.yml$" hm-dictionary-file)
+       (if (string-match "en\.ja\.yml$" hm-dictionary-file)
            (hm-initialize-for-logaling mistaken-word)
          (set (make-local-variable 'hm-current-word)
               (or mistaken-word (hm-fetch-random-word))))))))
@@ -313,7 +313,7 @@ Turn read only back on when done."
         finally return result))
 
 (defun hm-insert-target-word-for-logaling ()
-  (when (string-match "\.yml$" hm-dictionary-file)
+  (when (string-match "en\.ja\.yml$" hm-dictionary-file)
     (forward-line 2)
     (end-of-line)
     (insert (format "         Meaning: %s" (hm-extract :target)))))
