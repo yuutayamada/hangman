@@ -150,6 +150,8 @@ Turn read only back on when done."
 (defun hm-initialize ()
   "Initialize *Hangman* buffer and setup new word."
   (interactive)
+  (unless hm-mistaken-words
+    (setq hm-review nil))
   (hm-fetch)
   (setq hm-displaying-guess-string (hm-make-guess-string)
         hm-num-failed-guesses 0
