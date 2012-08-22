@@ -154,7 +154,7 @@ Turn read only back on when done."
   t)
 
 (defun hm-fetch ()
-  (let* ((mistaken-length (length hm-mistaken-words))
+  (let* ((mistaken-length (1- (length hm-mistaken-words)))
          (mistaken-word
           (if (< 10 mistaken-length)
               (nth (random mistaken-length) hm-mistaken-words)
