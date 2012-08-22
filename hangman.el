@@ -99,7 +99,7 @@
 (defvar hm-current-word nil
   "This is not the word the user must guess represented as a vector.")
 
-(defvar hm-current-guess-string nil
+(defvar hm-displaying-guess-string nil
   "The string representing what the user has guessed correctly so far.")
 
 (defvar hm-wrong-guess-string nil
@@ -149,7 +149,7 @@ Turn read only back on when done."
   "Initialize this buffer w/ a new word."
   (interactive)
   (hm-fetch)
-  (setq hm-current-guess-string (hm-make-guess-string)
+  (setq hm-displaying-guess-string (hm-make-guess-string)
         hm-num-failed-guesses 0
         hm-wrong-guess-string ""
         buffer-read-only t)
@@ -223,21 +223,21 @@ Turn read only back on when done."
                                         (upcase string)))))
 
 (defun hm-found-guess-string (i character)
-  (aset hm-current-guess-string (* i 2) character) ;upcase
-  (hm-fontify-char hm-current-guess-string (* 2 i)
+  (aset hm-displaying-guess-string (* i 2) character) ;upcase
+  (hm-fontify-char hm-displaying-guess-string (* 2 i)
                    'font-lock-function-name-face))
 
 (defun hm-already-guessed (c)
   "Signal an error if character C has already been played."
   (let ((case-fold-search t) (re c))
     (when (or (string-match re hm-wrong-guess-string)
-              (string-match re hm-current-guess-string))
+              (string-match re hm-displaying-guess-string))
       (minibuffer-message "You have already guessed %s" c)
       t)))
 
 (defun hm-judgment ()
   (let ((case-fold-search nil))
-    (if (string-match "[a-z_] " hm-current-guess-string)
+    (if (string-match "[a-z_] " hm-displaying-guess-string)
         (when (= hm-num-failed-guesses (1- (length hm-vector)))
           (hm-lose))
       (hm-refresh)
@@ -248,7 +248,7 @@ Turn read only back on when done."
   (add-to-list 'hm-mistaken-words (hm-extract :source))
   ;; Lose count
   (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
-  (setq hm-current-guess-string (hm-make-guess-string t))
+  (setq hm-displaying-guess-string (hm-make-guess-string t))
   (hm-refresh)
   (hm-query-playng-again 'lost))
 
@@ -260,9 +260,9 @@ Turn read only back on when done."
         finally (setq hm-mistaken-words updated-mistaken-words)))
 
 (defun hm-win-p ()
-  (equal (- (length hm-current-guess-string)
+  (equal (- (length hm-displaying-guess-string)
             (hm-count-ignoring-character))
-         (length (replace-regexp-in-string "_" "" hm-current-guess-string))))
+         (length (replace-regexp-in-string "_" "" hm-displaying-guess-string))))
 
 (defun hm-query-playng-again (win-or-lost)
   (if (y-or-n-p (concat "You " (symbol-name win-or-lost) "! Play again?"))
@@ -288,7 +288,7 @@ Turn read only back on when done."
 (defun hm-insert-currnet-guess-string ()
   (forward-line 20)
   (end-of-line)
-  (insert "\n              " (hm-convert hm-current-guess-string) "\n"))
+  (insert "\n              " (hm-convert hm-displaying-guess-string) "\n"))
 
 (defun hm-convert (guess-string)
   (if hm-use-other-format
@@ -350,7 +350,7 @@ Turn read only back on when done."
   "Return a string representing a new guess string based on STRING.
 Optional argument FINISH non-nil means to not replace characters with _."
   (loop with new-string = ""
-        with finished-word   = hm-current-guess-string
+        with finished-word   = hm-displaying-guess-string
         with unfinished-word = hm-current-word
         for i from 0 upto (1- (length unfinished-word))
         if (string-match "[a-zA-Z_]" (hm-nth-string i unfinished-word))
@@ -360,7 +360,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
         finally return (if finish? finished-word new-string)))
 
 (defun hm-coloring-to-unifinished-word (i)
-  (let* ((finished-word   hm-current-guess-string)
+  (let* ((finished-word   hm-displaying-guess-string)
          (unfinished-word hm-current-word))
     (when (char-equal (aref finished-word (* 2 i)) ?_)
       (aset finished-word (* 2 i) (aref unfinished-word i))
