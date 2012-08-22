@@ -325,7 +325,16 @@ Turn read only back on when done."
   (when (string-match "en\.ja\.yml$" hm-dictionary-file)
     (forward-line 2)
     (end-of-line)
-    (insert (format "         Meaning: %s" (hm-extract :target)))))
+    (insert (format "         Meaning: %s" (hm-extract :target)))
+    (forward-line 1)
+    (end-of-line)
+    (insert (format "        Review-mode: %s" (if hm-review
+                                                   "on"
+                                                 "off")))
+    (forward-line 1)
+    (end-of-line)
+    (insert (format "                    Mistaken: %i \n"
+                    (length hm-mistaken-words)))))
 
 ;;; Text Properties
 (defun hm-fontify-char (string idx face)
