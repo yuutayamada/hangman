@@ -167,7 +167,8 @@ Turn read only back on when done."
       (:random
        (if (string-match "en\.ja\.yml$" hm-dictionary-file)
            (hm-initialize-for-logaling mistaken-word)
-         (setq hm-original-current-word (or mistaken-word (hm-fetch-random-word))))))))
+         (setq hm-original-current-word
+               (or mistaken-word (hm-fetch-random-word))))))))
 
 (defun hm-review-mode-p ()
   (or (< hm-mistaken-word-memory-limit (1- (length hm-mistaken-words)))
