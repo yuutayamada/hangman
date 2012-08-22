@@ -396,7 +396,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
       (if (not mistaken-word)
           (goto-char (random (point-max)))
         (goto-char (point-min))
-        (re-search-forward mistaken-word)
+        (re-search-forward (concat "source_term: " mistaken-word))
         (goto-char (point-at-bol))
         (goto-char (1- (point))))
       (if (re-search-forward (concat source-regexp target-regexp) nil t)
