@@ -338,13 +338,13 @@ Optional argument FINISH non-nil means to not replace characters with _."
         with unfinished-word = hm-original-current-word
         with allowing-regexp = "[a-zA-Z_]"
         for i from 0 upto (1- (length unfinished-word))
-        if (and (string-match allowing-regexp (hm-nth-string i unfinished-word))
+        for character = (hm-nth-string i unfinished-word)
+        if (and (string-match allowing-regexp character)
                 finish?)
         do (hm-coloring-to-unifinished-word i)
-        else if (or (equal " " (hm-nth-string i unfinished-word))
-                    (equal "_" (hm-nth-string i unfinished-word)))
-        do      (setq new-string (concat new-string " ")) ;;
-        else do (setq new-string (concat new-string "_")) ;;
+        else if (string-match "[ ']" character)
+        do      (setq new-string (concat new-string character))
+        else do (setq new-string (concat new-string "_"))
         finally return (if finish? finished-word new-string)))
 
 (defun hm-coloring-to-unifinished-word (i)
