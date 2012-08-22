@@ -173,7 +173,7 @@ Turn read only back on when done."
                (or mistaken-word (hm-fetch-random-word))))))))
 
 (defun hm-review-mode-p ()
-  (or (< hm-mistaken-word-memory-limit (1- (length hm-mistaken-words)))
+  (or (< hm-mistaken-word-memory-limit (length hm-mistaken-words))
       hm-review))
 
 (defun hm-initialize-for-logaling (&optional mistaken-word)
