@@ -330,7 +330,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
   (loop with new-string = ""
         with finished-word   = hm-displaying-guess-string
         with unfinished-word = hm-original-current-word
-        with allowing-regexp = "[a-zA-Z_]"
+        with allowing-regexp = "[a-zA-Z]"
         for i from 0 upto (1- (length unfinished-word))
         for character = (hm-nth-string i unfinished-word)
         if (and (string-match allowing-regexp character)
