@@ -265,29 +265,35 @@ Turn read only back on when done."
 
 (defun hm-query-playng-again (win-or-lost)
   (if (y-or-n-p (concat "You " (symbol-name win-or-lost) "! Play again?"))
-      (hm-initialize)))
+      (hm-initialize)
+    (hm-refresh t)))
 
 ;;; Rendering
-(defun hm-refresh ()
+(defun hm-refresh (&optional game-over)
   "Refresh the hangman buffer w/ new images."
   (hm-with-writable
     (erase-buffer)
     (insert (aref hm-vector hm-num-failed-guesses))
     (goto-char (point-min))
-    (forward-line 2)
-    (end-of-line)
-    (insert "         Failed Letters: " hm-wrong-guess-string)
-    (forward-line 2)
-    (end-of-line)
-    (insert (format "         Games won: %d    Games Lost: %d"
-                    (aref hm-win-statistics 0) (aref hm-win-statistics 1)))
-    (hm-insert-target-word-for-logaling)
-    (hm-insert-currnet-guess-string)))
-
-(defun hm-insert-currnet-guess-string ()
-  (forward-line 20)
-  (end-of-line)
-  (insert "\n              " hm-displaying-guess-string "\n"))
+    (loop for line from 0 upto (window-height) do
+          (case line
+            (1 (insert "         Failed Letters: " hm-wrong-guess-string))
+            (3 (insert (format "         Games won: %d    Games Lost: %d"
+                               (aref hm-win-statistics 0)
+                               (aref hm-win-statistics 1))))
+            (9 (insert "\n              " hm-displaying-guess-string "\n")))
+          (when (string-match "en\.ja\.yml$" hm-dictionary-file)
+            (case line
+              (5 (insert (format "         Meaning: %s" (hm-extract :target))))
+              (6 (insert (format "        Review-mode: %s"
+                                 (if hm-review "on" "off"))))
+              (7 (insert (format "       Mistaken: %i"
+                                 (length hm-mistaken-words))))))
+          (forward-line 1)
+          (end-of-line))
+    (when game-over
+      (animate-string "GAME  OVER" 12
+                      (- (/ (window-width) 2) 15)))))
 
 (defun hm-nth-string (n string)
   (nth n (hm-split-string string)))
@@ -302,19 +308,6 @@ Turn read only back on when done."
         if (string< "" token)
         collect token into result
         finally return result))
-
-(defun hm-insert-target-word-for-logaling ()
-  (when (string-match "en\.ja\.yml$" hm-dictionary-file)
-    (forward-line 2)
-    (end-of-line)
-    (insert (format "         Meaning: %s" (hm-extract :target)))
-    (forward-line 1)
-    (end-of-line)
-    (insert (format "        Review-mode: %s" (if hm-review "on" "off")))
-    (forward-line 1)
-    (end-of-line)
-    (insert (format "                    Mistaken: %i \n"
-                    (length hm-mistaken-words)))))
 
 ;;; Text Properties
 (defun hm-fontify-char (string idx face)
