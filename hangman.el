@@ -188,7 +188,7 @@ Turn read only back on when done."
 (defun hm-self-guess-char ()
   "Guess the character that was pressed."
   (interactive)
-  (hm-check-each-character last-input-event)
+  (hm-check-each-character (char-to-string last-input-event))
   (hm-refresh)
   (hm-judgment)
   (when (hm-win-p)
@@ -206,15 +206,14 @@ Turn read only back on when done."
         finally return nil)))
 
 (defun hm-check-each-character (input)
-  (unless (hm-already-guessed (char-to-string input))
+  (unless (hm-already-guessed input)
     (loop with case-fold-search = nil
           for i from 0 upto (1- (length hm-original-current-word))
-          for character = input
           for found = 0 then found
-          if (char-equal (aref hm-original-current-word i) character) do
+          if (equal (hm-nth-string i hm-original-current-word) input) do
           (setq found (1+ found))
-          (hm-found-guess-string i character)
-          finally (hm-response found (char-to-string character)))))
+          (hm-found-guess-string i (string-to-char input))
+          finally (hm-response found input))))
 
 (defun hm-response (found string)
   (if (/= found 0)
