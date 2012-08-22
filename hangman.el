@@ -132,6 +132,8 @@
 
 (defvar hm-use-other-format nil)
 
+(defvar hm-mistaken-word-memory-limit 5)
+
 (defmacro hm-with-writable (&rest forms)
   "Allow the buffer to be writable and evaluate FORMS.
 Turn read only back on when done."
