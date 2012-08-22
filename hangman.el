@@ -204,10 +204,10 @@ Turn read only back on when done."
 (defun hm-corrected-answer-p ()
   (unless hm-review
     (loop with current-answer = (hm-extract :source)
-        for answer in hm-correct-answer-list
-        if (equal answer current-answer)
-        do (return t)
-        finally return nil)))
+          for answer in hm-correct-answer-list
+          if (equal answer current-answer)
+          do (return t)
+          finally return nil)))
 
 (defun hm-check-each-character (input)
   (unless (hm-already-guessed input)
