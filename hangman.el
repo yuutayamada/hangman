@@ -212,7 +212,7 @@ Turn read only back on when done."
           for found = 0 then found
           if (equal (hm-nth-string i hm-original-current-word) input) do
           (setq found (1+ found))
-          (hm-found-guess-string i (string-to-char input))
+          (hm-replace-guess-string i (string-to-char input))
           finally (hm-response found input))))
 
 (defun hm-response (found string)
@@ -223,7 +223,7 @@ Turn read only back on when done."
           hm-wrong-guess-string (concat hm-wrong-guess-string " "
                                         (upcase string)))))
 
-(defun hm-found-guess-string (i character)
+(defun hm-replace-guess-string (i character)
   (aset hm-displaying-guess-string (* i 2) character) ;upcase
   (hm-fontify-char hm-displaying-guess-string (* 2 i)
                    'font-lock-function-name-face))
