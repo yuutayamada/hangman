@@ -150,7 +150,7 @@ Turn read only back on when done."
 (defun hm-initialize ()
   "Initialize *Hangman* buffer and setup new word."
   (interactive)
-  (hm-fetch)
+  (hm-fetch (hm-review-mode-p))
   (setq hm-displaying-guess-string (hm-make-guess-string)
         hm-num-failed-guesses 0
         hm-wrong-guess-string ""
@@ -158,18 +158,20 @@ Turn read only back on when done."
   (hm-refresh)
   t)
 
-(defun hm-fetch ()
+(defun hm-fetch (review)
   (let* ((mistaken-length (1- (length hm-mistaken-words)))
-         (mistaken-word
-          (when (or (< hm-mistaken-word-memory-limit mistaken-length)
-                    hm-review)
-            (setq hm-review t)
-            (nth (random mistaken-length) hm-mistaken-words))))
+         (mistaken-word (when review
+                          (setq hm-review t)
+                          (nth (random mistaken-length) hm-mistaken-words))))
     (case hm-current-fetch-process
       (:random
        (if (string-match "en\.ja\.yml$" hm-dictionary-file)
            (hm-initialize-for-logaling mistaken-word)
          (setq hm-current-word (or mistaken-word (hm-fetch-random-word))))))))
+
+(defun hm-review-mode-p ()
+  (or (< hm-mistaken-word-memory-limit (1- (length hm-mistaken-words)))
+      hm-review))
 
 (defun hm-initialize-for-logaling (&optional mistaken-word)
   (hm-setup-word-for-logaling mistaken-word)
