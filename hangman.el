@@ -79,6 +79,8 @@
 
 (defvar hm-current-fetch-process :random)
 
+(defvar hm-ignoring-character "[_ ']")
+
 (defvar hm-review nil)
 
 ;;; Game Mode
@@ -172,8 +174,6 @@ Turn read only back on when done."
 (defun hm-initialize-for-logaling (&optional mistaken-word)
   (hm-setup-word-for-logaling mistaken-word)
   (setq hm-current-word (hm-extract :source)))
-
-(defvar hm-ignoring-character "[_ ']")
 
 (defun hm-count-ignoring-character ()
   (loop with tokens = (string-to-list (split-string (hm-extract :source) ""))
