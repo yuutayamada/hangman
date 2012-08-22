@@ -84,6 +84,8 @@
 
 (defvar hm-review nil)
 
+(defvar hm-ignore-single-word t)
+
 ;;; Game Mode
 (defalias 'hangman 'hm-mode)
 
@@ -401,8 +403,13 @@ Optional argument FINISH non-nil means to not replace characters with _."
           (funcall make-alist)
         (re-search-backward (concat source-regexp target-regexp) nil t)
         (funcall make-alist)))
-    (if (hm-corrected-answer-p)
+    (if (or (hm-corrected-answer-p)
+            (hm-single-word-p))
         (hm-setup-word-for-logaling))))
+
+(defun hm-single-word-p ()
+  (if hm-ignore-single-word
+      (not (string-match " " (hm-extract :source)))))
 
 (defun hm-quit ()
   (interactive)
