@@ -397,8 +397,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
           (funcall make-alist)
         (re-search-backward (concat source-regexp target-regexp) nil t)
         (funcall make-alist)))
-    (if (and hm-correct-answer-list
-             (hm-corrected-answer-p))
+    (if (hm-corrected-answer-p)
         (hm-setup-word-for-logaling))))
 
 (provide 'hangman)
