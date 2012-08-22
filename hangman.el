@@ -326,9 +326,7 @@ Turn read only back on when done."
     (insert (format "         Meaning: %s" (hm-extract :target)))
     (forward-line 1)
     (end-of-line)
-    (insert (format "        Review-mode: %s" (if hm-review
-                                                   "on"
-                                                 "off")))
+    (insert (format "        Review-mode: %s" (if hm-review "on" "off")))
     (forward-line 1)
     (end-of-line)
     (insert (format "                    Mistaken: %i \n"
