@@ -289,22 +289,23 @@ Turn read only back on when done."
 (defun hm-insert-currnet-guess-string ()
   (forward-line 20)
   (end-of-line)
-  (insert "\n              " (hm-convert hm-displaying-guess-string) "\n"))
+  (insert "\n              " (hm-convert) "\n"))
 
-(defun hm-convert (guess-string)
+(defun hm-convert ()
   (if hm-use-other-format
-      (loop with source-tokens = (hm-split-string (hm-extract :source))
+      (loop with source-tokens = (hm-split-string (hm-extract :row_source))
             with result = '()
-            for num from 0 upto (1- (length (hm-extract :source)))
+            for num from 0 upto (1- (length source-tokens))
             for current-character = (nth num source-tokens)
             for guess = (nth num
                              (hm-split-string
-                              (replace-regexp-in-string " " "" guess-string)))
-            if (string= "_" current-character)
+                              (replace-regexp-in-string " " ""
+                                         hm-displaying-guess-string)))
+            if (string= " " current-character)
             collect " " into result
             else collect guess into result
             finally return (mapconcat 'identity result ""))
-    guess-string))
+    hm-displaying-guess-string))
 
 (defun hm-nth-string (n string)
   (nth n (hm-split-string string)))
@@ -387,6 +388,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
 
 (defun hm-extract (&optional choice)
   (case choice
+    (:row_source (assoc-default 'source hm-current-word-alist))
     (:source
      (replace-regexp-in-string " " "_"
                                (downcase
