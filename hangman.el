@@ -149,11 +149,10 @@ Turn read only back on when done."
   "Initialize this buffer w/ a new word."
   (interactive)
   (hm-fetch)
-  (set (make-local-variable 'hm-current-guess-string)
-       (hm-make-guess-string))
-  (set (make-local-variable 'hm-num-failed-guesses) 0)
-  (set (make-local-variable 'hm-wrong-guess-string) "")
-  (setq buffer-read-only t)
+  (setq hm-current-guess-string (hm-make-guess-string)
+        hm-num-failed-guesses 0
+        hm-wrong-guess-string ""
+        buffer-read-only t)
   (hm-refresh)
   t)
 
@@ -168,12 +167,11 @@ Turn read only back on when done."
       (:random
        (if (string-match "en\.ja\.yml$" hm-dictionary-file)
            (hm-initialize-for-logaling mistaken-word)
-         (set (make-local-variable 'hm-current-word)
-              (or mistaken-word (hm-fetch-random-word))))))))
+         (setq hm-current-word (or mistaken-word (hm-fetch-random-word))))))))
 
 (defun hm-initialize-for-logaling (&optional mistaken-word)
   (hm-setup-word-for-logaling mistaken-word)
-  (set (make-local-variable 'hm-current-word) (hm-extract :source)))
+  (setq hm-current-word (hm-extract :source)))
 
 (defvar hm-ignoring-character "[_ ']")
 
