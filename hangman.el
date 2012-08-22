@@ -376,7 +376,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
     (goto-char (random (point-max)))
     (beginning-of-line)
     (prog1
-        (buffer-substring-no-properties (point) (progn (end-of-line) (point)))
+        (buffer-substring-no-properties (point) (point-at-eol))
       (goto-char (point-min)))))
 
 (defun hm-extract (&optional choice)
