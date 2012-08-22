@@ -79,6 +79,8 @@
 
 (defvar hm-current-fetch-process :random)
 
+(defvar hm-review nil)
+
 ;;; Game Mode
 (defalias 'hangman 'hm-mode)
 
@@ -156,9 +158,10 @@ Turn read only back on when done."
 (defun hm-fetch ()
   (let* ((mistaken-length (1- (length hm-mistaken-words)))
          (mistaken-word
-          (if (< 10 mistaken-length)
-              (nth (random mistaken-length) hm-mistaken-words)
-            nil)))
+          (when (or (< hm-mistaken-word-memory-limit mistaken-length)
+                    hm-review)
+            (setq hm-review t)
+            (nth (random mistaken-length) hm-mistaken-words))))
     (case hm-current-fetch-process
       (:random
        (if (string-match "en\.ja\.yml$" hm-dictionary-file)
@@ -191,11 +194,12 @@ Turn read only back on when done."
     (hm-query-playng-again 'win)))
 
 (defun hm-corrected-answer-p ()
-  (loop with current-answer = (hm-extract :source)
+  (unless hm-review
+    (loop with current-answer = (hm-extract :source)
         for answer in hm-correct-answer-list
         if (equal answer current-answer)
         do (return t)
-        finally return nil))
+        finally return nil)))
 
 (defun hm-check-each-character (input)
   (unless (hm-already-guessed (char-to-string input))
