@@ -297,8 +297,14 @@ Turn read only back on when done."
           (forward-line 1)
           (end-of-line))
     (when game-over
-      (animate-string "GAME  OVER" 12
-                      (- (/ (window-width) 2) 15)))))
+      (hm-game-over))))
+
+(defun hm-game-over ()
+  (loop with game-over = "GAME OVER"
+        for i from 0 upto (length game-over)
+        for char = (hm-nth-string i game-over) do
+        (animate-string char 12 (+ i (- (/ (window-width) 2) 15))))
+  (animate-string "Until next time!" 13 (- (/ (window-width) 2) 15)))
 
 (defun hm-nth-string (n string)
   (nth n (hm-split-string string)))
