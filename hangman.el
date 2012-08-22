@@ -374,11 +374,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
 
 (defun hm-extract (&optional choice)
   (case choice
-    (:row_source (assoc-default 'source hm-current-word-alist))
-    (:source
-     (replace-regexp-in-string " " "_"
-                               (downcase
-                                (assoc-default 'source hm-current-word-alist))))
+    (:source (downcase (assoc-default 'source hm-current-word-alist)))
     (:target (assoc-default 'target hm-current-word-alist))
     (t hm-current-word-alist)))
 
@@ -393,7 +389,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
       (if (not mistaken-word)
           (goto-char (random (point-max)))
         (goto-char (point-min))
-        (re-search-forward (replace-regexp-in-string "_" " " mistaken-word))
+        (re-search-forward mistaken-word)
         (goto-char (point-at-bol))
         (goto-char (1- (point))))
       (if (re-search-forward (concat source-regexp target-regexp) nil t)
