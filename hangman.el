@@ -148,7 +148,7 @@ Turn read only back on when done."
 (put 'hm-with-writable 'lisp-indent-function 0)
 
 (defun hm-initialize ()
-  "Initialize this buffer w/ a new word."
+  "Initialize *Hangman* buffer and setup new word."
   (interactive)
   (hm-fetch)
   (setq hm-displaying-guess-string (hm-make-guess-string)
