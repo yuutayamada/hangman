@@ -98,7 +98,7 @@
   (run-hooks 'hm-hooks))
 
 ;;; Game playing functions and variables
-(defvar hm-current-word nil
+(defvar hm-original-current-word nil
   "This is not the word the user must guess represented as a vector.")
 
 (defvar hm-displaying-guess-string nil
@@ -167,7 +167,7 @@ Turn read only back on when done."
       (:random
        (if (string-match "en\.ja\.yml$" hm-dictionary-file)
            (hm-initialize-for-logaling mistaken-word)
-         (setq hm-current-word (or mistaken-word (hm-fetch-random-word))))))))
+         (setq hm-original-current-word (or mistaken-word (hm-fetch-random-word))))))))
 
 (defun hm-review-mode-p ()
   (or (< hm-mistaken-word-memory-limit (1- (length hm-mistaken-words)))
@@ -175,7 +175,7 @@ Turn read only back on when done."
 
 (defun hm-initialize-for-logaling (&optional mistaken-word)
   (hm-setup-word-for-logaling mistaken-word)
-  (setq hm-current-word (hm-extract :source)))
+  (setq hm-original-current-word (hm-extract :source)))
 
 (defun hm-count-ignoring-character ()
   (loop with tokens = (string-to-list (split-string (hm-extract :source) ""))
@@ -208,10 +208,10 @@ Turn read only back on when done."
 (defun hm-check-each-character (input)
   (unless (hm-already-guessed (char-to-string input))
     (loop with case-fold-search = nil
-          for i from 0 upto (1- (length hm-current-word))
+          for i from 0 upto (1- (length hm-original-current-word))
           for character = input
           for found = 0 then found
-          if (char-equal (aref hm-current-word i) character) do
+          if (char-equal (aref hm-original-current-word i) character) do
           (setq found (1+ found))
           (hm-found-guess-string i character)
           finally (hm-response found (char-to-string character)))))
@@ -353,7 +353,7 @@ Turn read only back on when done."
 Optional argument FINISH non-nil means to not replace characters with _."
   (loop with new-string = ""
         with finished-word   = hm-displaying-guess-string
-        with unfinished-word = hm-current-word
+        with unfinished-word = hm-original-current-word
         for i from 0 upto (1- (length unfinished-word))
         if (string-match "[a-zA-Z_]" (hm-nth-string i unfinished-word))
         do (if finish?
@@ -363,7 +363,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
 
 (defun hm-coloring-to-unifinished-word (i)
   (let* ((finished-word   hm-displaying-guess-string)
-         (unfinished-word hm-current-word))
+         (unfinished-word hm-original-current-word))
     (when (char-equal (aref finished-word (* 2 i)) ?_)
       (aset finished-word (* 2 i) (aref unfinished-word i))
       (hm-fontify-char finished-word (* 2 i) 'font-lock-comment-face))))
