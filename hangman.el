@@ -175,11 +175,13 @@ Turn read only back on when done."
   (hm-setup-word-for-logaling mistaken-word)
   (set (make-local-variable 'hm-current-word) (hm-extract :source)))
 
-(defun hm-count-under-score ()
+(defvar hm-ignoring-character "[_ ']")
+
+(defun hm-count-ignoring-character ()
   (loop with tokens = (string-to-list (split-string (hm-extract :source) ""))
         for token in tokens
         for count = 0 then count
-        if (string-match "_" token)
+        if (string-match hm-ignoring-character token)
         do (setq count (+ count 1))
         finally return count))
 
@@ -260,7 +262,8 @@ Turn read only back on when done."
         finally (setq hm-mistaken-words updated-mistaken-words)))
 
 (defun hm-win-p ()
-  (equal (- (length hm-current-guess-string) (hm-count-under-score))
+  (equal (- (length hm-current-guess-string)
+            (hm-count-ignoring-character))
          (length (replace-regexp-in-string "_" "" hm-current-guess-string))))
 
 (defun hm-query-playng-again (win-or-lost)
