@@ -213,9 +213,10 @@ Turn read only back on when done."
     (loop with case-fold-search = nil
           for i from 0 upto (1- (length hm-original-current-word))
           for found = 0 then found
-          if (equal (hm-nth-string i hm-original-current-word) input) do
+          for token = (hm-nth-string i hm-original-current-word)
+          if (equal (downcase token) input) do
           (setq found (1+ found))
-          (hm-replace-guess-string i (string-to-char input))
+          (hm-replace-guess-string i)
           finally (hm-response found input))))
 
 (defun hm-response (found string)
@@ -226,8 +227,9 @@ Turn read only back on when done."
           hm-wrong-guess-string (concat hm-wrong-guess-string " "
                                         (upcase string)))))
 
-(defun hm-replace-guess-string (i character)
-  (aset hm-displaying-guess-string i character) ;upcase
+(defun hm-replace-guess-string (i)
+  (aset hm-displaying-guess-string i
+        (string-to-char (hm-nth-string i hm-original-current-word)))
   (hm-fontify-char hm-displaying-guess-string i
                    'font-lock-function-name-face))
 
@@ -370,7 +372,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
 
 (defun hm-extract (&optional choice)
   (case choice
-    (:source (downcase (assoc-default 'source hm-current-word-alist)))
+    (:source (assoc-default 'source hm-current-word-alist))
     (:target (assoc-default 'target hm-current-word-alist))
     (t hm-current-word-alist)))
 
