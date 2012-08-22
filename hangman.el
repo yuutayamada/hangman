@@ -206,15 +206,15 @@ Turn read only back on when done."
           if (char-equal (aref hm-current-word i) character) do
           (setq found (1+ found))
           (hm-found-guess-string i character)
-          finally (hm-response found character))))
+          finally (hm-response found (char-to-string character)))))
 
-(defun hm-response (found c)
+(defun hm-response (found string)
   (if (/= found 0)
-      (message "Found %d occurances of %c" found c)
-    (message "No uccurances of %c" c)
+      (message "Found %d occurances of %s" found string)
+    (message "No uccurances of %s" string)
     (setq hm-num-failed-guesses (1+ hm-num-failed-guesses)
           hm-wrong-guess-string (concat hm-wrong-guess-string " "
-                                        (char-to-string (upcase c))))))
+                                        (upcase string)))))
 
 (defun hm-found-guess-string (i character)
   (aset hm-current-guess-string (* i 2) character) ;upcase
