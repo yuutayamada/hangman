@@ -379,8 +379,8 @@ Optional argument FINISH non-nil means to not replace characters with _."
     (t hm-current-word-alist)))
 
 (defun hm-setup-word-for-logaling (&optional mistaken-word)
-  (let* ((source-regexp "- source_term: \\([a-zA-Z ]+\\)?\n")
-         (target-regexp "  target_term: \\(\\w+\\)?\n")
+  (let* ((source-regexp "- source_term: \\(.+\\)?\n")
+         (target-regexp "  target_term: \\(.+\\)?\n")
          (make-alist (lambda ()
                        (setq hm-current-word-alist
                              (list (cons 'source (match-string 1))
