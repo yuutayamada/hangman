@@ -286,7 +286,7 @@ Turn read only back on when done."
     (loop for line from 0 upto (window-height) do
           (case line
             (1 (insert "         Failed Letters: " hm-wrong-guess-string))
-            (3 (insert (format "         Games won: %d    Games Lost: %d"
+            (3 (insert (format "         Won: %d    Lost: %d"
                                (aref hm-win-statistics 0)
                                (aref hm-win-statistics 1))))
             (9 (insert "\n              " hm-displaying-guess-string "\n")))
