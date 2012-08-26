@@ -349,7 +349,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
         if (and (string-match allowing-regexp character)
                 finish?)
         do (hm-coloring-to-unifinished-word i)
-        else if (string-match "[' --!,.~0-9$%&;:]" character)
+        else if (string-match "[' --!?,.~0-9$%&;:]" character)
         do      (setq new-string (concat new-string character))
         else do (setq new-string (concat new-string "_"))
         finally return (if finish? finished-word new-string)))
