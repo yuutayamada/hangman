@@ -1,6 +1,7 @@
 ;;; hangman.el --- Hangman game
 
 ;;; Copyright (C) 1997  Eric M. Ludlam
+;;                2012  Yuta Yamada <cokesboy"at"gmail.com>
 ;;
 ;; Author: Eric M. Ludlam <zappo@gnu.ai.mit.edu>
 ;; Version: 0.1
