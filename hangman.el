@@ -293,11 +293,11 @@ Turn read only back on when done."
             (9 (insert "\n              " hm-displaying-guess-string "\n")))
           (when (string-match "en\.ja\.yml$" hm-dictionary-file)
             (case line
-              (5 (insert (format "         Meaning: %s" (hm-extract :target))))
               (6 (insert (format "        Review-mode: %s"
                                  (if hm-review "on" "off"))))
               (7 (insert (format "       Mistaken: %i"
-                                 (length hm-mistaken-words))))))
+                                 (length hm-mistaken-words))))
+              (10 (insert (format "\n     Meaning: %s" (hm-extract :target))))))
           (forward-line 1)
           (end-of-line))
     (when game-over
