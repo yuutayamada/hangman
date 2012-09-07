@@ -70,6 +70,7 @@
     (loop for i from ?a to ?z do
           (define-key map (char-to-string i) 'hm-self-guess-char))
     (define-key map " " 'hm-lose)
+    (define-key map "\C-k" 'hm-you-win) ; jump
     (define-key map "\C-j" 'hm-lose)
     (define-key map "\C-q" 'hm-quit)
     (define-key map "T" 'hm-toggle-spelling-practice-mode)
@@ -201,11 +202,15 @@ Turn read only back on when done."
   (hm-check-each-character (char-to-string last-input-event))
   (hm-refresh)
   (hm-judgment)
-  (when (hm-win-p)
-    (add-to-list 'hm-correct-answer-list (hm-extract :source))
-    (hm-delete-mistaken-word (hm-extract :source))
-    (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0)))
-    (hm-query-playng-again 'win)))
+  (if (hm-win-p)
+      (hm-you-win)))
+
+(defun hm-you-win ()
+  (interactive)
+  (add-to-list 'hm-correct-answer-list (hm-extract :source))
+  (hm-delete-mistaken-word (hm-extract :source))
+  (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0)))
+  (hm-query-playng-again 'win))
 
 (defun hm-corrected-answer-p ()
   (unless hm-review
