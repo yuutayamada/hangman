@@ -159,7 +159,7 @@ Turn read only back on when done."
   "Initialize *Hangman* buffer and setup new word."
   (interactive)
   (unless hm-mistaken-words
-    (setq hm-review nil))
+    (hm-review-mode :off))
   (hm-fetch)
   (setq hm-displaying-guess-string (hm-make-guess-string)
         hm-num-failed-guesses 0
@@ -171,7 +171,7 @@ Turn read only back on when done."
 (defun hm-fetch ()
   (let* ((mistaken-length (1- (length hm-mistaken-words)))
          (mistaken-word (when (hm-review-mode-p)
-                          (setq hm-review t)
+                          (hm-review-mode :on)
                           (nth (random mistaken-length) hm-mistaken-words))))
     (case hm-current-fetch-process
       (:random
@@ -179,6 +179,12 @@ Turn read only back on when done."
            (hm-initialize-for-logaling mistaken-word)
          (setq hm-original-current-word
                (or mistaken-word (hm-fetch-random-word))))))))
+
+(defun hm-review-mode (&optional force)
+  (let* ((choice (or force (if hm-review :off :on))))
+    (case choice
+      (:on  (setq hm-review t))
+      (:off (setq hm-review nil)))))
 
 (defun hm-review-mode-p ()
   (or (< hm-mistaken-word-memory-limit (length hm-mistaken-words))
