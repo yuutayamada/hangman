@@ -72,6 +72,7 @@
     (define-key map " " 'hm-lose)
     (define-key map "\C-j" 'hm-lose)
     (define-key map "\C-q" 'hm-quit)
+    (define-key map "T" 'hm-toggle-spelling-practice-mode)
     map)
   "Keymap used in hangman mode.")
 
@@ -139,6 +140,8 @@
 (defvar hm-use-other-format nil)
 
 (defvar hm-mistaken-word-memory-limit 3)
+
+(defvar hm-use-spelling-practice nil)
 
 (defmacro hm-with-writable (&rest forms)
   "Allow the buffer to be writable and evaluate FORMS.
@@ -213,18 +216,42 @@ Turn read only back on when done."
           finally return nil)))
 
 (defun hm-check-each-character (input)
-  (unless (hm-already-guessed input)
+  (unless (and (hm-already-guessed input)
+               (not hm-use-spelling-practice))
     (loop with case-fold-search = nil
           for i from 0 upto (1- (length hm-original-current-word))
           for found = 0 then found
           for token = (hm-nth-string i hm-original-current-word)
           if (equal (downcase token) input) do
           (setq found (1+ found))
-          (hm-replace-guess-string i)
+          (if (hm-first-charcter-p i)
+              (hm-replace-guess-string i))
           finally (hm-response found input))))
 
+(defun hm-toggle-spelling-practice-mode (&optional force)
+  (interactive)
+  (setq hm-use-spelling-practice
+        (if force
+            force
+          (if hm-use-spelling-practice nil t)))
+  (let* ((on-or-off (if hm-use-spelling-practice "on" "off")))
+    (minibuffer-message
+     (format "Toggle spelling practice mode: %s" on-or-off))))
+
+(defun hm-first-charcter-p (i)
+  (let* ((num  (max (1- i) 0))
+         (char (hm-nth-string num hm-displaying-guess-string))
+         (pre-char (hm-nth-string (max 0 (1- num)) hm-displaying-guess-string)))
+    (if hm-use-spelling-practice
+        (or (string-match "[a-zA-Z]" char)
+            (zerop num)
+            (and (string-match "[ ]" char)
+                 (string-match "[a-zA-Z]" pre-char)))
+      t)))
+
 (defun hm-response (found string)
-  (if (/= found 0)
+  (if (or (/= found 0)
+          (hm-already-guessed string t))
       (message "Found %d occurances of %s" found string)
     (message "No uccurances of %s" string)
     (setq hm-num-failed-guesses (1+ hm-num-failed-guesses)
@@ -237,12 +264,13 @@ Turn read only back on when done."
   (hm-fontify-char hm-displaying-guess-string i
                    'font-lock-function-name-face))
 
-(defun hm-already-guessed (c)
+(defun hm-already-guessed (str &optional no-message)
   "Signal an error if character C has already been played."
-  (let ((case-fold-search t) (re c))
-    (when (or (string-match re hm-wrong-guess-string)
-              (string-match re hm-displaying-guess-string))
-      (minibuffer-message "You have already guessed %s" c)
+  (let ((case-fold-search t))
+    (when (or (string-match str hm-wrong-guess-string)
+              (string-match str hm-displaying-guess-string))
+      (unless no-message
+        (minibuffer-message "You have already guessed %s" str))
       t)))
 
 (defun hm-judgment ()
