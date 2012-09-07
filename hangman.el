@@ -89,6 +89,9 @@
 
 (defvar hm-ignore-single-word t)
 
+(defvar hm-next-word-index 0)
+
+(defvar hm-ignoring-regexp "[' --!?,.~0-9$%&;:]")
 ;;; Game Mode
 (defalias 'hangman 'hm-mode)
 
@@ -144,6 +147,8 @@
 
 (defvar hm-use-spelling-practice nil)
 
+(defvar hm-use-sparta-mode t)
+
 (defmacro hm-with-writable (&rest forms)
   "Allow the buffer to be writable and evaluate FORMS.
 Turn read only back on when done."
@@ -161,10 +166,12 @@ Turn read only back on when done."
   (unless hm-mistaken-words
     (hm-review-mode :off))
   (hm-fetch)
+  (hm-set-spelling-check-flag)
   (setq hm-displaying-guess-string (hm-make-guess-string)
         hm-num-failed-guesses 0
         hm-wrong-guess-string ""
-        buffer-read-only t)
+        buffer-read-only t
+        hm-next-word-index 0)
   (hm-refresh)
   t)
 
@@ -186,6 +193,15 @@ Turn read only back on when done."
       (:on  (setq hm-review t))
       (:off (setq hm-review nil)))))
 
+(defun hm-set-spelling-check-flag ()
+  (when hm-use-sparta-mode
+    (if (loop for word in hm-mistaken-words
+              if (equal word hm-original-current-word)
+              do (return t)
+              finally return nil)
+        (setq hm-use-spelling-practice t)
+      (setq hm-use-spelling-practice nil))))
+
 (defun hm-review-mode-p ()
   (or (< hm-mistaken-word-memory-limit (length hm-mistaken-words))
       hm-review))
@@ -202,10 +218,19 @@ Turn read only back on when done."
         do (setq count (+ count 1))
         finally return count))
 
+(defun hm-count-next-index ()
+  (loop with length = (- (length hm-displaying-guess-string) 2)
+        for i from hm-next-word-index upto length
+        for char = (hm-nth-string i hm-displaying-guess-string)
+        if (string-match hm-ignoring-regexp char)
+        do (setq hm-next-word-index (1+ i))
+        else do (return)))
+
 (defun hm-self-guess-char ()
   "Guess the character that was pressed."
   (interactive)
   (hm-check-each-character (char-to-string last-input-event))
+  (hm-count-next-index)
   (hm-refresh)
   (hm-judgment)
   (if (hm-win-p)
@@ -230,13 +255,26 @@ Turn read only back on when done."
   (unless (and (hm-already-guessed input)
                (not hm-use-spelling-practice))
     (loop with case-fold-search = nil
-          for i from 0 upto (1- (length hm-original-current-word))
+          with length = (1- (length hm-original-current-word))
+          with initial = (if hm-use-spelling-practice
+                             (min hm-next-word-index (1- length))
+                           0)
+          for i from initial upto (if hm-use-spelling-practice
+                                      hm-next-word-index
+                                    length)
           for found = 0 then found
           for token = (hm-nth-string i hm-original-current-word)
           if (equal (downcase token) input) do
           (setq found (1+ found))
-          (if (hm-first-charcter-p i)
-              (hm-replace-guess-string i))
+          (if (not hm-use-spelling-practice)
+              (hm-replace-guess-string i)
+            (when (not
+                   (equal (hm-nth-string i hm-displaying-guess-string) token))
+              (hm-replace-guess-string i)
+              (hm-response found input)
+              (setq hm-next-word-index (1+ hm-next-word-index))
+              (hm-refresh)
+              (return)))
           finally (hm-response found input))))
 
 (defun hm-toggle-spelling-practice-mode (&optional force)
@@ -248,17 +286,6 @@ Turn read only back on when done."
   (let* ((on-or-off (if hm-use-spelling-practice "on" "off")))
     (minibuffer-message
      (format "Toggle spelling practice mode: %s" on-or-off))))
-
-(defun hm-first-charcter-p (i)
-  (let* ((num  (max (1- i) 0))
-         (char (hm-nth-string num hm-displaying-guess-string))
-         (pre-char (hm-nth-string (max 0 (1- num)) hm-displaying-guess-string)))
-    (if hm-use-spelling-practice
-        (or (string-match "[a-zA-Z]" char)
-            (zerop num)
-            (and (string-match "[ ]" char)
-                 (string-match "[a-zA-Z]" pre-char)))
-      t)))
 
 (defun hm-response (found string)
   (if (or (/= found 0)
@@ -332,6 +359,8 @@ Turn read only back on when done."
             (9 (insert "\n              " hm-displaying-guess-string "\n")))
           (when (string-match "en\.ja\.yml$" hm-dictionary-file)
             (case line
+              (5 (insert (format "         Spelling-practice-mode: %s"
+                                 (if hm-use-spelling-practice "on" "off"))))
               (6 (insert (format "        Review-mode: %s"
                                  (if hm-review "on" "off"))))
               (7 (insert (format "       Mistaken: %i"
@@ -389,7 +418,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
         if (and (string-match allowing-regexp character)
                 finish?)
         do (hm-coloring-to-unifinished-word i)
-        else if (string-match "[' --!?,.~0-9$%&;:]" character)
+        else if (string-match hm-ignoring-regexp character)
         do      (setq new-string (concat new-string character))
         else do (setq new-string (concat new-string "_"))
         finally return (if finish? finished-word new-string)))
