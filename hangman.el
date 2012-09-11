@@ -252,8 +252,8 @@ Turn read only back on when done."
           finally return nil)))
 
 (defun hm-check-each-character (input)
-  (unless (and (hm-already-guessed input)
-               (not hm-use-spelling-practice))
+  (unless (and (not hm-use-spelling-practice)
+               (hm-already-guessed input))
     (loop with case-fold-search = nil
           with length = (1- (length hm-original-current-word))
           with initial = (if hm-use-spelling-practice
