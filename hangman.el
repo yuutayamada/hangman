@@ -248,24 +248,22 @@ Turn read only back on when done."
   (hm-check-each-character (char-to-string last-input-event))
   (hm-count-next-index)
   (hm-refresh)
-  (hm-judgment)
-  (when (hm-win-p)
-    (hm-set-stat :win)
-    (hm-initialize)))
+  (hm-judgment))
 
 (defun hm-set-stat (state)
   (interactive)
-  (case state
+  (let ((source (hm-extract :source)))
+    (case state
     (:win
-     (add-to-list 'hm-correct-answer-list (hm-extract :source))
-     (hm-delete-mistaken-word (hm-extract :source))
+     (add-to-list 'hm-correct-answer-list source)
+     (hm-delete-mistaken-word source)
      (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0))))
     (:lose
-     (add-to-list 'hm-mistaken-words (hm-extract :source))
-     ;; Lose count
+     (add-to-list 'hm-mistaken-words source)
      (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
-     (setq hm-displaying-guess-string (hm-make-guess-string t))
-     (hm-refresh))))
+     (setq hm-displaying-guess-string (hm-make-guess-string t))))
+    (hm-refresh)
+    (hm-initialize)))
 
 (defun hm-corrected-answer-p ()
   (unless hm-review
@@ -338,10 +336,11 @@ Turn read only back on when done."
 (defun hm-judgment ()
   (let ((case-fold-search nil))
     (if (string-match "[a-z_] " hm-displaying-guess-string)
-        (when (= hm-num-failed-guesses (1- (length hm-vector)))
-          (hm-set-stat :lose))
-      (hm-refresh)
-      t)))
+        (if (= (1- (length hm-vector)) hm-num-failed-guesses)
+            (hm-set-stat :lose))
+      (hm-refresh))
+    (when (hm-win-p)
+      (hm-set-stat :win))))
 
 (defun hm-give-up ()
   (interactive)
