@@ -380,7 +380,7 @@ Turn read only back on when done."
           (when (string-match "en\.ja\.yml$" hm-dictionary-file)
             (case line
               (5 (insert (format "         Spelling-practice-mode: %s"
-                                 (if hm-use-spelling-practice "on" "off"))))
+                                  (if hm-use-spelling-practice "on" "off"))))
               (6 (insert (format "        Review-mode: %s"
                                  (if hm-review "on" "off"))))
               (7 (insert (format "       Mistaken: %i"
