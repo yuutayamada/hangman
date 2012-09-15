@@ -92,6 +92,9 @@
 (defvar hm-next-word-index 0)
 
 (defvar hm-ignoring-regexp "[' --!?,.~0-9$%&;:]")
+
+(defvar hm-history '())
+
 ;;; Game Mode
 (defalias 'hangman 'hm-mode)
 
@@ -185,7 +188,20 @@ Turn read only back on when done."
        (if (string-match "en\.ja\.yml$" hm-dictionary-file)
            (hm-initialize-for-logaling mistaken-word)
          (setq hm-original-current-word
-               (or mistaken-word (hm-fetch-random-word))))))))
+               (or mistaken-word (hm-fetch-random-word)))))
+      ;; (:practice
+      ;;  (setq hm-original-current-word (hm-extract :source)))
+      )
+    (hm-save-history)))
+
+(defun hm-nthcar (n list)
+  (reverse (nthcdr (- (length list) n) (reverse list))))
+
+(defun hm-save-history ()
+  (if (< 10 (length hm-history))
+      (setq hm-history
+            (hm-nthcar 9 hm-history)))
+  (push hm-current-word-alist hm-history))
 
 (defun hm-review-mode (&optional force)
   (let* ((choice (or force (if hm-review :off :on))))
@@ -365,11 +381,20 @@ Turn read only back on when done."
                                  (if hm-review "on" "off"))))
               (7 (insert (format "       Mistaken: %i"
                                  (length hm-mistaken-words))))
-              (10 (insert (format "\n     Meaning: %s" (hm-extract :target))))))
+              (10 (insert (format "\n     Meaning: %s" (hm-extract :target))))
+              (11 (hm-insert-prewords))))
           (forward-line 1)
           (end-of-line))
     (when game-over
       (hm-game-over))))
+
+(defun hm-insert-prewords ()
+  (let* ((pre-word-pair (cadr hm-history))
+         (source (cdar  pre-word-pair))
+         (target (cdadr pre-word-pair)))
+    (insert (format "\n=======================================\n"))
+    (insert (format "          %s \n          %s" source target))))
+
 
 (defun hm-game-over ()
   (loop with game-over = "GAME OVER"
@@ -462,16 +487,14 @@ Optional argument FINISH non-nil means to not replace characters with _."
                              (list (cons 'source (match-string 1))
                                    (cons 'target (match-string 2)))))))
     (with-current-buffer (find-file-noselect hm-dictionary-file)
-      (if (not mistaken-word)
-          (goto-char (random (point-max)))
-        (goto-char (point-min))
-        (re-search-forward (concat "source_term: " mistaken-word))
-        (goto-char (point-at-bol))
-        (goto-char (1- (point))))
-      (if (re-search-forward (concat source-regexp target-regexp) nil t)
-          (funcall make-alist)
-        (re-search-backward (concat source-regexp target-regexp) nil t)
-        (funcall make-alist)))
+      (if mistaken-word
+          (setq hm-current-word-alist (hm-fetch-from-yaml mistaken-word))
+        ;; general
+        (goto-char (random (point-max)))
+        (if (re-search-forward (concat source-regexp target-regexp) nil t)
+            (funcall make-alist)
+          (re-search-backward (concat source-regexp target-regexp) nil t)
+          (funcall make-alist))))
     (if (or (hm-corrected-answer-p)
             (hm-single-word-p))
         (hm-setup-word-for-logaling))))
@@ -483,6 +506,88 @@ Optional argument FINISH non-nil means to not replace characters with _."
 (defun hm-quit ()
   (interactive)
   (kill-buffer "*Hangman*"))
+
+(defvar hm-practice-word "")
+(defvar my/practice-english-current-line 0)
+(defvar my/english-question-collections
+  '("~/Dropbox/Document/english_word_pinats_silver.org"))
+
+(defun my/fetch-english-word ()
+  (interactive)
+  (let* ((base (current-buffer))
+         (next-line
+          (lambda ()
+            (point-min)
+            (beginning-of-line)
+            (line-move (setq my/practice-english-current-line
+                             (1+ my/practice-english-current-line)))))
+         line)
+    (save-current-buffer
+      (with-temp-buffer
+        (find-file (file-truename
+                    (car my/english-question-collections)))
+        (funcall next-line)
+        (while (looking-at "* .+")
+          (funcall next-line))
+        (setq line (substring-no-properties (thing-at-point 'line)))
+        (string-match " +\\(.+\\)\n" line)
+        (setq hm-practice-word (match-string 1 line))))
+    (switch-to-buffer base)))
+
+(defun hm-fetch-from-yaml (&optional word-or-index)
+  (let* ((fetch-from-yaml
+          (lambda ()
+            (unless word-or-index (my/fetch-english-word))
+            (unless (null hm-practice-word)
+              (hm-extract-word-from (file-truename hm-dictionary-file)
+                                    (or word-or-index hm-practice-word)))))
+         (format
+          (lambda (json)
+            (loop for list across (json-read-from-string json)
+                  for note   = (cdr (nth 0 list))
+                  for target = (cdr (nth 1 list))
+                  for source = (cdr (nth 2 list))
+                  finally return (list (cons 'source source)
+                                       (cons 'target target))))))
+    (funcall format (funcall fetch-from-yaml))))
+
+(defun hm-do-ruby (body match)
+  (shell-command-to-string (concat "ruby -e " "'" body "' \"" match "\"")))
+
+(defun hm-extract-word-from (file arg)
+  (hm-do-ruby
+   (concat
+      "
+require \"rubygems\"
+require \"yaml\"
+require \"json/pure\"
+
+arg = ARGV[0]
+index = false
+if arg.to_s =~ /[0-9]+/ && !(arg.to_s =~ /a-zA-Z/)
+  index = arg.to_i
+else
+  match = arg.to_s
+end
+
+file = \"" file "\"
+if File.exist?(file)
+  open(file, \"r\") do |contents|
+    yaml = YAML.load(contents.read)
+    unless index
+      yaml.each do |json|
+        if json[\"source_term\"] =~ /#{match}/
+          output = JSON.pretty_generate(json)
+          puts \"[\" + output + \"]\"
+        end
+      end
+    else
+      puts \"[\" + JSON.pretty_generate(yaml[index.to_i]) + \"]\"
+    end
+  end
+else
+  puts \"file not found\"
+end") arg))
 
 (provide 'hangman)
 ;;; hangman.el ends here
