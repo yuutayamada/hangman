@@ -69,11 +69,11 @@
   (let* ((map (make-sparse-keymap)))
     (loop for i from ?a to ?z do
           (define-key map (char-to-string i) 'hm-self-guess-char))
-    (define-key map " " 'hm-lose)
+    (define-key map " "    'hm-give-up)
+    (define-key map "\C-j" 'hm-give-up)
     (define-key map "\C-k" 'hm-you-win) ; jump
-    (define-key map "\C-j" 'hm-lose)
     (define-key map "\C-q" 'hm-quit)
-    (define-key map "T" 'hm-toggle-spelling-practice-mode)
+    (define-key map "T"    'hm-toggle-spelling-practice-mode)
     map)
   "Keymap used in hangman mode.")
 
@@ -249,15 +249,23 @@ Turn read only back on when done."
   (hm-count-next-index)
   (hm-refresh)
   (hm-judgment)
-  (if (hm-win-p)
-      (hm-you-win)))
+  (when (hm-win-p)
+    (hm-set-stat :win)
+    (hm-initialize)))
 
-(defun hm-you-win ()
+(defun hm-set-stat (state)
   (interactive)
-  (add-to-list 'hm-correct-answer-list (hm-extract :source))
-  (hm-delete-mistaken-word (hm-extract :source))
-  (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0)))
-  (hm-query-playng-again 'win))
+  (case state
+    (:win
+     (add-to-list 'hm-correct-answer-list (hm-extract :source))
+     (hm-delete-mistaken-word (hm-extract :source))
+     (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0))))
+    (:lose
+     (add-to-list 'hm-mistaken-words (hm-extract :source))
+     ;; Lose count
+     (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
+     (setq hm-displaying-guess-string (hm-make-guess-string t))
+     (hm-refresh))))
 
 (defun hm-corrected-answer-p ()
   (unless hm-review
@@ -331,18 +339,14 @@ Turn read only back on when done."
   (let ((case-fold-search nil))
     (if (string-match "[a-z_] " hm-displaying-guess-string)
         (when (= hm-num-failed-guesses (1- (length hm-vector)))
-          (hm-lose))
+          (hm-set-stat :lose))
       (hm-refresh)
       t)))
 
-(defun hm-lose ()
+(defun hm-give-up ()
   (interactive)
-  (add-to-list 'hm-mistaken-words (hm-extract :source))
-  ;; Lose count
-  (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
-  (setq hm-displaying-guess-string (hm-make-guess-string t))
-  (hm-refresh)
-  (hm-query-playng-again 'lost))
+  (hm-set-stat :lose)
+  (hm-initialize))
 
 (defun hm-delete-mistaken-word (corrected-word)
   (loop with updated-mistaken-words = '()
