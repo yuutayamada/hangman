@@ -71,7 +71,7 @@
           (define-key map (char-to-string i) 'hm-self-guess-char))
     (define-key map " "    'hm-give-up)
     (define-key map "\C-j" 'hm-give-up)
-    (define-key map "\C-k" 'hm-you-win) ; jump
+    (define-key map "\C-k" 'hm-skip) ; jump
     (define-key map "\C-q" 'hm-quit)
     (define-key map "T"    'hm-toggle-spelling-practice-mode)
     map)
@@ -344,7 +344,11 @@ Turn read only back on when done."
 
 (defun hm-give-up ()
   (interactive)
-  (hm-set-stat :lose)
+  (hm-set-stat :lose))
+
+(defun hm-skip ()
+  (interactive)
+  (hm-set-stat :win)
   (hm-initialize))
 
 (defun hm-delete-mistaken-word (corrected-word)
