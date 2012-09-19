@@ -91,7 +91,7 @@
 
 (defvar hm-next-word-index 0)
 
-(defvar hm-ignoring-regexp "[' --!?,.~0-9$%&;:]")
+(defvar hm-ignoring-regexp "[' --!?,.~0-9$%&;:/]")
 
 (defvar hm-history '())
 
