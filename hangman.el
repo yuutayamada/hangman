@@ -53,6 +53,8 @@
 (eval-when-compile
   (require 'cl))
 
+(require 'json)
+
 (defvar hm-user-proper-nouns-flag t
   "*Non-nil means to allow proper nouns as potential words.")
 
