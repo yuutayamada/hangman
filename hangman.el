@@ -191,10 +191,15 @@ Turn read only back on when done."
            (hm-initialize-for-logaling mistaken-word)
          (setq hm-original-current-word
                (or mistaken-word (hm-fetch-random-word)))))
-      ;; (:practice
-      ;;  (setq hm-original-current-word (hm-extract :source)))
-      )
+      (:practice
+       (hm-fetch/practice-word mistaken-word)))
     (hm-save-history)))
+
+(defun hm-fetch/practice-word (&optional mistaken-word)
+  (lexical-let
+      ((search-word (or mistaken-word (hm-fetch-english-word))))
+    (setq hm-current-word-alist (hm-fetch-from-yaml search-word)
+          hm-original-current-word (hm-extract :source))))
 
 (defun hm-nthcar (n list)
   (reverse (nthcdr (- (length list) n) (reverse list))))
