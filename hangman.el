@@ -521,7 +521,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
 (defvar my/english-question-collections
   '("~/Dropbox/Document/english_word_pinats_silver.org"))
 
-(defun my/fetch-english-word ()
+(defun hm-fetch-english-word ()
   (interactive)
   (let* ((next-line
           (lambda ()
@@ -544,7 +544,7 @@ Optional argument FINISH non-nil means to not replace characters with _."
 (defun hm-fetch-from-yaml (&optional word-or-index)
   (let* ((fetch-from-yaml
           (lambda ()
-            (unless word-or-index (my/fetch-english-word))
+            (unless word-or-index (hm-fetch-english-word))
             (unless (null hm-practice-word)
               (hm-extract-word-from (file-truename hm-dictionary-file)
                                     (or word-or-index hm-practice-word)))))
