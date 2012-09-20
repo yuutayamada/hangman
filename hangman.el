@@ -523,25 +523,23 @@ Optional argument FINISH non-nil means to not replace characters with _."
 
 (defun my/fetch-english-word ()
   (interactive)
-  (let* ((base (current-buffer))
-         (next-line
+  (let* ((next-line
           (lambda ()
             (point-min)
             (beginning-of-line)
             (line-move (setq my/practice-english-current-line
                              (1+ my/practice-english-current-line)))))
          line)
-    (save-current-buffer
-      (with-temp-buffer
-        (find-file (file-truename
-                    (car my/english-question-collections)))
-        (funcall next-line)
-        (while (looking-at "* .+")
-          (funcall next-line))
-        (setq line (substring-no-properties (thing-at-point 'line)))
-        (string-match " +\\(.+\\)\n" line)
-        (setq hm-practice-word (match-string 1 line))))
-    (switch-to-buffer base)))
+    (with-temp-buffer
+      (insert-file-contents
+       (file-truename
+        (car my/english-question-collections)))
+      (funcall next-line)
+      (while (looking-at "* .+")
+        (funcall next-line))
+      (setq line (substring-no-properties (thing-at-point 'line)))
+      (string-match " +\\(.+\\)\n" line)
+      (setq hm-practice-word (match-string 1 line)))))
 
 (defun hm-fetch-from-yaml (&optional word-or-index)
   (let* ((fetch-from-yaml
