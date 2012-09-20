@@ -517,8 +517,8 @@ Optional argument FINISH non-nil means to not replace characters with _."
   (kill-buffer "*Hangman*"))
 
 (defvar hm-practice-word "")
-(defvar my/practice-english-current-line 0)
-(defvar my/english-question-collections
+(defvar hm/practice-english-current-line 0)
+(defvar hm/english-question-collections
   '("~/Dropbox/Document/english_word_pinats_silver.org"))
 
 (defun hm-fetch-english-word ()
@@ -527,13 +527,13 @@ Optional argument FINISH non-nil means to not replace characters with _."
           (lambda ()
             (point-min)
             (beginning-of-line)
-            (line-move (setq my/practice-english-current-line
-                             (1+ my/practice-english-current-line)))))
+            (line-move (setq hm/practice-english-current-line
+                             (1+ hm/practice-english-current-line)))))
          line)
     (with-temp-buffer
       (insert-file-contents
        (file-truename
-        (car my/english-question-collections)))
+        (car hm/english-question-collections)))
       (funcall next-line)
       (while (looking-at "* .+")
         (funcall next-line))
