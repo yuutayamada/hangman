@@ -98,8 +98,6 @@
 (defvar hm-history '())
 
 ;;; Game Mode
-(defalias 'hangman 'hm-mode)
-
 (defun hm-mode ()
   "Major mode for playing the hangman game against emacs."
   (interactive)
@@ -110,6 +108,10 @@
   (use-local-map hm-map)
   (hm-initialize)
   (run-hooks 'hm-hooks))
+
+(defun hangman ()
+  (interactive)
+  (hm-mode))
 
 ;;; Game playing functions and variables
 (defvar hm-original-current-word nil
