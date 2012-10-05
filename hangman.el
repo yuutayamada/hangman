@@ -541,8 +541,10 @@ Optional argument FINISH non-nil means to not replace characters with _."
        (file-truename
         (car hm/english-question-collections)))
       (funcall next-line)
-      (while (looking-at "* .+")
-        (funcall next-line))
+      (beginning-of-line)
+      (while (looking-at "^* .+")
+        (funcall next-line)
+        (beginning-of-line))
       (setq line (substring-no-properties (thing-at-point 'line)))
       (string-match " +\\(.+\\)\n" line)
       (setq hm-practice-word (match-string 1 line)))))
