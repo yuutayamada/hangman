@@ -271,7 +271,6 @@ Turn read only back on when done."
      (add-to-list 'hm-mistaken-words source)
      (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
      (setq hm-displaying-guess-string (hm-make-guess-string t))))
-    (hm-refresh)
     (hm-initialize)))
 
 (defun hm-corrected-answer-p ()
