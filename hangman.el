@@ -263,14 +263,14 @@ Turn read only back on when done."
   (interactive)
   (let ((source (hm-extract :source)))
     (case state
-    (:win
-     (add-to-list 'hm-correct-answer-list source)
-     (hm-delete-mistaken-word source)
-     (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0))))
-    (:lose
-     (add-to-list 'hm-mistaken-words source)
-     (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
-     (setq hm-displaying-guess-string (hm-make-guess-string t))))
+      (:win
+       (add-to-list 'hm-correct-answer-list source)
+       (hm-delete-mistaken-word source)
+       (aset hm-win-statistics 0 (1+ (aref hm-win-statistics 0))))
+      (:lose
+       (add-to-list 'hm-mistaken-words source)
+       (aset hm-win-statistics 1 (1+ (aref hm-win-statistics 1)))
+       (setq hm-displaying-guess-string (hm-make-guess-string t))))
     (hm-initialize)))
 
 (defun hm-corrected-answer-p ()
