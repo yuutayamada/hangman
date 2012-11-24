@@ -524,8 +524,8 @@ Optional argument FINISH non-nil means to not replace characters with _."
 
 (defvar hm-practice-word "")
 (defvar hm/practice-english-current-line 0)
-(defvar hm/english-question-collections
-  '("~/Dropbox/Document/english_word_pinats_silver.org"))
+(defvar hm/english-question-collections '()
+  "Set up list of string type file-name for challenge")
 
 (defun hm-fetch-english-word ()
   (interactive)
