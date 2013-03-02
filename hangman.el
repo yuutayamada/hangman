@@ -1,3 +1,4 @@
+;;; -*- coding: utf-8 mode: emacs-lisp -*-
 ;;; hangman.el --- Hangman game
 
 ;;; Copyright (C) 1997  Eric M. Ludlam
