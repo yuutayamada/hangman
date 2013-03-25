@@ -563,7 +563,10 @@ Optional argument FINISH non-nil means to not replace characters with _."
                   for source = (cdr (nth 2 list))
                   finally return (list (cons 'source source)
                                        (cons 'target target))))))
-    (funcall format (funcall fetch-from-yaml))))
+    (funcall format
+             (condition-case error
+                 (funcall fetch-from-yaml)
+               (error "perhaps You need 'gem install json'")))))
 
 (defun hm-do-ruby (body match)
   (shell-command-to-string (concat "ruby -e " "'" body "' \"" match "\"")))
